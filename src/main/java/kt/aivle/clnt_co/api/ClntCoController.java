@@ -20,7 +20,7 @@ public class ClntCoController {
   @Autowired
   private ClntCoService clntCoService;
 
-  @ApiOperation(value = "테스트 등록")
+  @ApiOperation(value = "테스트 등록d")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResModel.class)})
   @PostMapping(value = "/reg-test-tt",
       consumes = MediaType.APPLICATION_JSON_VALUE,
