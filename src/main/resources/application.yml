@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: pmt-service
+  profiles:
+    active: local
+  servlet:
+    multipart:
+      maxFileSize: 1024MB
+      maxRequestSize: 1024MB
+
+server:
+  port: 7773
+  servlet:
+    context-path: /api/
+
+file:
+  path: /Users/bj_develop/Desktop/
+
+img:
+  path: /Users/bj_develop/Desktop/
+  url: /Users/bj_develop/Downloads
+
+#jasypt:
+#  encryptor:
+#    bean: jasyptStringEncryptor
+
+logger:
+  stacktrace: true
+
+springfox:
+  documentation:
+    swagger:
+      v2:
+        path: /api-docs

@@ -1,0 +1,32 @@
+# Discovery Server Access
+
+spring:
+  datasource:
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    jdbc-url: jdbc:log4jdbc:mariadb://211.37.148.101:3306/oneshops?autoReconnect=true&characterEncoding=UTF-8&allowMultiQueries=true&useAffectedRows=true
+    username: oneshops
+    password: ENC(6WN2/YwUDkrCoXA2uyAKkP+QVgb5614Z)
+
+
+logger:
+  stacktrace: true
+
+springfox:
+  documentation:
+    swagger:
+      v2:
+        path: /api-docs
+
+server:
+  port: 7773
+  servlet:
+    context-path: /api/
+
+file:
+  path: /uploads/
+
+img:
+  path: /uploads/
+  url: http://www.ipmt.com/uploads
+
+
