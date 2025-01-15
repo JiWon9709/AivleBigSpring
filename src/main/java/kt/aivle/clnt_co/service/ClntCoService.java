@@ -42,6 +42,7 @@ public class ClntCoService {
   @Transactional
   public BaseResModel regTest(TestRequest testRequest) {
     BaseResModel result = new BaseResModel<>();
+
     try {
       int cnt = clntCoMapper.regTest(testRequest);
       if (cnt == 0) {
@@ -107,5 +108,27 @@ public class ClntCoService {
     return result;
   }
 
+  /**
+   * 테스트 리스트
+   *
+   * @param testRequest
+   * @return
+   */
+  @Transactional
+  public BaseResListModel<TestList> testList(TestRequest testRequest) {
+    BaseResListModel<TestList> result = new BaseResListModel<>();
 
+    try {
+      List<TestList> list = clntCoMapper.testList(testRequest);
+      if (list.size() == 0) {
+        result.setResultMsg(BaseMsg.FAILED.getValue());
+        result.setResultCode(BaseMsg.FAILED.getCode());
+      } else {
+        result.setData(list);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("리스트를 불러오던 중 에러가 발생했습니다." + e);
+    }
+    return result;
+  }
 }
