@@ -32,3 +32,4 @@ springfox:
     swagger:
       v2:
         path: /api-docs
+
