@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kt.aivle.rslt_list.mapper.RsltListMapper">
+
+  <sql id="clntCoList">
+    <if test='keyword != null and keyword != ""'>
+      <if test='searchType != null and searchType == 1'>
+        AND clnt_nm LIKE CONCAT('%',#{keyword},'%')
+      </if>
+      <if test='searchType != null and searchType == 2'>
+        AND addr LIKE CONCAT('%',#{keyword},'%')
+      </if>
+    </if>
+    <if test='dealYn == 1'>
+      AND deal_yn LIKE = 'Y'
+    </if>
+    <if test='dealYn == 2'>
+      AND deal_yn LIKE = 'N'
+    </if>
+  </sql>
+
+  <!-- 현재 활성화되어있는 공고 sn 찾기 -->
+  <select
+    id="getActiveGongoSn"
+    resultType="Integer"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper.getActiveGongoSn*/
+    SELECT COALESCE(
+      (SELECT g.gongo_sn
+      FROM gongo AS g
+      WHERE g.use_yn = 'Y'),
+      0
+    ) AS result;
+  </select>
+
+  <!-- 공고 sn으로 해당하는 공고 dtlsn 찾기 -->
+  <select
+    id="getDtlSnByGongoSn"
+    resultType="Integer"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper.getDtlSnByGongoSn*/
+    SELECT
+    gd.gongo_dtl_sn
+    FROM gongo_dtl AS gd
+    WHERE gd.gongo_sn = #{sn}
+  </select>
+
+  <!-- 공고 dtlsn으로 해당하는 주택 sn 찾기 -->
+  <select
+    id="getJutaekSnByDtlSn"
+    resultType="Integer"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper.getJutaekSnByDtlSn*/
+    SELECT
+      gd.jutaek_sn
+    FROM gongo_dtl AS gd
+    WHERE gd.gongo_dtl_sn IN(
+    <foreach item="item" collection="list" separator=",">
+      #{item}
+    </foreach>
+    );
+  </select>
+
+  <!-- 주택 sn으로 주택 리스트 찾기 cnt -->
+  <select
+    id="getJutaekListCnt"
+    resultType="Integer"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper.getJutaekListCnt*/
+    SELECT
+    COUNT(*)
+    FROM jutaek_dtl AS jd
+    LEFT JOIN jutaek AS j ON j.jutaek_sn = jd.jutaek_sn
+    WHERE jd.jutaek_sn IN(
+    <foreach item="item" collection="jutaekSnList" separator=",">
+      #{item}
+    </foreach>
+    )
+  </select>
+
+  <!-- 주택 sn으로 주택 리스트 찾기 -->
+  <select
+    id="getJutaekList"
+    resultType="kt.aivle.rslt_list.model.JutaekInfo"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper.getJutaekList*/
+    SELECT
+    jd.jutaek_dtl_sn
+    , jd.jutaek_sn
+    , jd.jutaek_size
+    , jd.residential_area
+    , jd.common_area
+    , jd.other_area
+    FROM jutaek_dtl AS jd
+    LEFT JOIN jutaek AS j ON j.jutaek_sn = jd.jutaek_sn
+    WHERE jd.jutaek_sn IN(
+    <foreach item="item" collection="jutaekSnList" separator=",">
+      #{item}
+    </foreach>
+    )
+    <if test='pageNum gt 0'>
+      LIMIT #{pageOffset}, #{pageSize}
+    </if>
+  </select>
+
+  <!-- 의뢰사등록 -->
+  <select
+      id="testList"
+      parameterType="kt.aivle.clnt_co.model.TestRequest"
+      resultType="kt.aivle.clnt_co.model.TestList"
+  >
+    /* kt.aivle.clnt_co.ClntCoMapper.testList*/
+    SELECT
+    1
+    FROM employee
+    WHERE employee.employee_id = #{employeeId}
+  </select>
+</mapper>
