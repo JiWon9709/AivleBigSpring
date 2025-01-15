@@ -16,4 +16,12 @@ public interface ClntCoMapper {
    * @return
    */
   public int regTest(TestRequest testRequest);
+
+  /**
+   * 테스트리스트
+   *
+   * @param testRequest
+   * @return
+   */
+  public List<TestList> testList(TestRequest testRequest);
 }

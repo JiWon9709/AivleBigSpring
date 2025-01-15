@@ -52,4 +52,20 @@ public class ClntCoController {
     return response;
   }
 
+
+  @ApiOperation(value = "리스트테스트")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResModel.class)})
+  @PostMapping(value = "/info",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public BaseResListModel<TestList> testList(@ApiParam(value = "리스트테스트", required = true) @RequestBody TestRequest testRequest) {
+    BaseResListModel<TestList> response = new BaseResListModel();
+    try {
+      response = clntCoService.testList(testRequest);
+    } catch (Exception e) {
+      response.setResultMsg(e.getMessage());
+      response.setResultCode(BaseMsg.FAILED.getCode());
+    }
+    return response;
+  }
 }
