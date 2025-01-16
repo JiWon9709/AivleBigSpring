@@ -16,7 +16,7 @@ public class UserService {
     public void signup(SignupRequestDTO signupRequest) {
         //이메일 중복 체크
         if (userMapper.findByEmail(signupRequest.getEmail()) != null) {
-            throw new IllegalArgumentException("이미 존쟇나느 이메일입니다.");
+            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
 
         User user = new User();
