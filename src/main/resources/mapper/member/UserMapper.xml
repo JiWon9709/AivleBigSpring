@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kt.aivle.member.mapper.UserMapper">
+
+    <insert id="insertUser" parameterType="kt.aivle.member.model.entity.User">
+        INSERT INTO user (
+            user_name, email, password, gender,
+            address, zip_code, telno, use_yn,
+            created_dt, updated_dt
+        ) VALUES (
+            #{userName}, #{email}, #{password}, #{gender},
+            #{address}, #{zipCode}, #{telno}, 'Y',
+            NOW(), NOW()
+        )
+
+    </insert>
+
+
+    <select id="findByEmail" parameterType="String" resultType="kt.aivle.member.model.entity.User">
+        SELECT * FROM user
+        WHERE email = #{email}
+        AND use_yn = 'Y'
+    </select>
+</mapper>
