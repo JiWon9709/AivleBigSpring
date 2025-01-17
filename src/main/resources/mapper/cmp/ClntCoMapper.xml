@@ -51,4 +51,17 @@
     , NOW()
     );
   </insert>
+
+  <!-- 의뢰사등록 -->
+  <select
+      id="testList"
+      parameterType="kt.aivle.clnt_co.model.TestRequest"
+      resultType="kt.aivle.clnt_co.model.TestList"
+  >
+    /* kt.aivle.clnt_co.ClntCoMapper.testList*/
+    SELECT
+    1
+    FROM employee
+    WHERE employee.employee_id = #{employeeId}
+  </select>
 </mapper>
