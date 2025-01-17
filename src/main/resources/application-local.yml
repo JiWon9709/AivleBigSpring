@@ -1,21 +1,10 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    jdbc-url: jdbc:mysql://localhost:3306/myshop2024?autoReconnect=true&characterEncoding=UTF-8&allowMultiQueries=true&useAffectedRows=true
+    jdbc-url: jdbc:mysql://127.0.0.1:3306/myshop2024?autoReconnect=true&characterEncoding=UTF-8&allowMultiQueries=true&useAffectedRows=true
     username: root
-    password: qjawnalwn22@
+    password: '0000'
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: navidi7311@gmail.com
-    password: alqgomjrjfsfcehl
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
 
 secret:
   access: acc
