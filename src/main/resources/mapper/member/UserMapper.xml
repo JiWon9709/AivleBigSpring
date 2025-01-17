@@ -17,7 +17,8 @@
 
 
     <select id="findByEmail" parameterType="String" resultType="kt.aivle.member.model.entity.User">
-        SELECT * FROM user
+        SELECT *
+        FROM user
         WHERE email = #{email}
         AND use_yn = 'Y'
     </select>
