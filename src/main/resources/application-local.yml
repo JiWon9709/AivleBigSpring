@@ -6,6 +6,8 @@ spring:
     password: '0000'
 
 
+
+
 secret:
   access: acc
   refresh: ref
