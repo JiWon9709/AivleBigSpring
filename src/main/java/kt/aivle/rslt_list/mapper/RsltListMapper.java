@@ -27,6 +27,7 @@ public interface RsltListMapper {
 
   /**
    * 공고 dtlsn으로 해당하는 주택 sn 찾기
+   *
    * @param gongoDtlSnList
    * @return
    */
@@ -34,6 +35,7 @@ public interface RsltListMapper {
 
   /**
    * 주택 sn으로 주택 리스트 찾기 cnt
+   *
    * @param jutaekListRequest
    * @return
    */
@@ -41,15 +43,9 @@ public interface RsltListMapper {
 
   /**
    * 주택 sn으로 주택 리스트 찾기
+   *
    * @param jutaekListRequest
    * @return
    */
   public List<JutaekInfo> getJutaekList(JutaekListRequest jutaekListRequest);
-
-  /**
-   * 결과 리스트
-   *
-   * @return
-   */
-  public List<TestList> rsltList();
 }

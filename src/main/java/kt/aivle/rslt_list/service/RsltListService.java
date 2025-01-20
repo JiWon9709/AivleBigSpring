@@ -1,12 +1,9 @@
 package kt.aivle.rslt_list.service;
 
-import kt.aivle.base.BaseListModel;
 import kt.aivle.base.BaseMsg;
 import kt.aivle.base.BaseResListModel;
-import kt.aivle.clnt_co.model.*;
 import kt.aivle.rslt_list.mapper.RsltListMapper;
 import kt.aivle.rslt_list.model.JutaekInfo;
-import kt.aivle.rslt_list.model.JutaekInfoListResponse;
 import kt.aivle.rslt_list.model.JutaekListRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,15 +29,15 @@ public class RsltListService {
    * @return
    */
   @Transactional
-  public JutaekInfoListResponse rsltList(BaseListModel baseListModel) {
-    JutaekInfoListResponse result = new JutaekInfoListResponse();
+  public BaseResListModel<JutaekInfo> rsltList(JutaekListRequest jutaekListRequest) {
+    BaseResListModel<JutaekInfo> result = new BaseResListModel();
 
     // 페이징 파라미터 전달
-    result.setPageNum(baseListModel.getPageNum());
-    result.setPageSize(baseListModel.getPageSize());
+    result.setPageNum(jutaekListRequest.getPageNum());
+    result.setPageSize(jutaekListRequest.getPageSize());
     // 페이지 계산
-    if (baseListModel.getPageNum() > 0) {
-      baseListModel.setPageOffset((baseListModel.getPageNum() - 1) * baseListModel.getPageSize());
+    if (jutaekListRequest.getPageNum() > 0) {
+      jutaekListRequest.setPageOffset((jutaekListRequest.getPageNum() - 1) * jutaekListRequest.getPageSize());
     }
 
     // 일단 지금 사용중인 공고 sn을 찾고
@@ -65,22 +62,16 @@ public class RsltListService {
       result.setResultCode(BaseMsg.FAILED.getCode());
     } else {
       // 그걸로 주택 sn 받아서 주택의 정보 리스트로 던져주기
-      JutaekListRequest jutaekListRequest = new JutaekListRequest();
       jutaekListRequest.setJutaekSnList(jutaekSnList);
-      jutaekListRequest.setPageNum(baseListModel.getPageNum());
-      jutaekListRequest.setPageSize(baseListModel.getPageSize());
-      jutaekListRequest.setPageOffset(baseListModel.getPageOffset());
-
       int jutaekListCnt = rsltListMapper.getJutaekListCnt(jutaekListRequest);
       if (jutaekListCnt == 0) {
         result.setResultMsg("조회 결과가 없습니다.");
         result.setResultCode(BaseMsg.FAILED.getCode());
       } else {
         List<JutaekInfo> infoList = rsltListMapper.getJutaekList(jutaekListRequest);
-        result.setJutaekInfoList(infoList);
+        result.setData(infoList);
       }
     }
-    // 추후 필터링까지 쿼리에 적용
     return result;
   }
 }

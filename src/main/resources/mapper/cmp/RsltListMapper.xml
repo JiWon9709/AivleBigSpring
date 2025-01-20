@@ -2,20 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kt.aivle.rslt_list.mapper.RsltListMapper">
 
-  <sql id="clntCoList">
-    <if test='keyword != null and keyword != ""'>
-      <if test='searchType != null and searchType == 1'>
-        AND clnt_nm LIKE CONCAT('%',#{keyword},'%')
-      </if>
-      <if test='searchType != null and searchType == 2'>
-        AND addr LIKE CONCAT('%',#{keyword},'%')
-      </if>
+  <sql id="getJutaekList">
+    <if test="location != null and location.size > 0">
+      AND (
+      <foreach item="loc" collection="location" separator=" OR ">
+        j.jutaek_address LIKE CONCAT('%', #{loc}, '%')
+      </foreach>
+      )
     </if>
-    <if test='dealYn == 1'>
-      AND deal_yn LIKE = 'Y'
+    <if test="minSize != null and minSize != '' and maxSize != null and maxSize != ''">
+      AND CAST(jd.jutaek_type AS UNSIGNED) BETWEEN #{minSize} AND #{maxSize}
     </if>
-    <if test='dealYn == 2'>
-      AND deal_yn LIKE = 'N'
+    <if test="minGuarantee != null and minGuarantee != '' and maxGuarantee != null and maxGuarantee != ''">
+      AND jd.guarantee BETWEEN #{minGuarantee} AND #{maxGuarantee}
+    </if>
+    <if test="minMonthly != null and minMonthly != '' and maxMonthly != null and maxMonthly != ''">
+      AND jd.monthly BETWEEN #{minMonthly} AND #{maxMonthly}
     </if>
   </sql>
 
@@ -76,6 +78,7 @@
       #{item}
     </foreach>
     )
+    <include refid="getJutaekList" />
   </select>
 
   <!-- 주택 sn으로 주택 리스트 찾기 -->
@@ -91,6 +94,9 @@
     , jd.residential_area
     , jd.common_area
     , jd.other_area
+    , jd.jutaek_type
+    , jd.guarantee
+    , jd.monthly
     FROM jutaek_dtl AS jd
     LEFT JOIN jutaek AS j ON j.jutaek_sn = jd.jutaek_sn
     WHERE jd.jutaek_sn IN(
@@ -98,21 +104,27 @@
       #{item}
     </foreach>
     )
+    <include refid="getJutaekList" />
     <if test='pageNum gt 0'>
       LIMIT #{pageOffset}, #{pageSize}
     </if>
   </select>
 
-  <!-- 의뢰사등록 -->
+  <!--주택 상세정보 조회 -->
   <select
-      id="testList"
-      parameterType="kt.aivle.clnt_co.model.TestRequest"
-      resultType="kt.aivle.clnt_co.model.TestList"
+    id="getJutaekDtl"
+    resultType="kt.aivle.rslt_list.model.JutaekInfo"
   >
-    /* kt.aivle.clnt_co.ClntCoMapper.testList*/
+    /* kt.aivle.rslt_list.RsltListMapper.getJutaekDtl*/
     SELECT
-    1
-    FROM employee
-    WHERE employee.employee_id = #{employeeId}
+    jd.jutaek_dtl_sn
+    , jd.jutaek_sn
+    , jd.jutaek_size
+    , jd.residential_area
+    , jd.common_area
+    , jd.other_area
+    FROM jutaek_dtl AS jd
+    WHERE jd.jutaek_dtl_sn = #{jutaekDtlSn}
   </select>
+
 </mapper>
