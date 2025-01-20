@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kt.aivle.gongo1111.mapper.GongoMapper">
+
+    <select id="selectActiveGongos" resultType="kt.aivle.gongo1111.model.dto.GongoDTO">
+        SELECT
+            gongo_sn,
+            gongo_name,
+            schedule_start_dt,
+            schedule_end_dt,
+            document_start_dt,
+            document_end_dt,
+            created_dt,
+            updated_dt
+        FROM gongo
+        WHERE
+        <![CDATA[
+            DATE(schedule_end_dt) >= CURDATE()
+            AND DATE(schedule_start_dt) <= CURDATE()
+        ]]>
+        ORDER BY schedule_end_dt ASC
+    </select>
+
+    <select id="selectGongoByGongoSn" parameterType="Integer" resultType="kt.aivle.gongo1111.model.dto.GongoDTO">
+        SELECT
+            gongo_sn,
+            gongo_name,
+            schedule_start_dt,
+            schedule_end_dt,
+            document_start_dt,
+            document_end_dt,
+            created_dt,
+            updated_dt
+        FROM gongo
+        WHERE gongo_sn = #{gongoSn}
+    </select>
+
+
+</mapper>

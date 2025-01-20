@@ -6,7 +6,7 @@
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # 로컬 개발환경 파일 제외
-application-local.yml
+/src/main/resources/application-local.yml
 
 # User-specific stuff
 .idea/**/workspace.xml
