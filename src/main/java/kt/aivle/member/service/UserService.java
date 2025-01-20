@@ -7,16 +7,18 @@ import kt.aivle.member.model.entity.User;
 import kt.aivle.util.Sha256Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.NoSuchAlgorithmException;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserService {
     private final UserMapper userMapper;
-    //private final BCryptPasswordEncoder passwordEncoder;
 
-    public void signup(SignupRequestDTO signupRequest) {
+    @Transactional
+    public void signup(SignupRequestDTO signupRequest) { // 회원가입
         //이메일 중복 체크
         if (userMapper.findByEmail(signupRequest.getEmail()) != null) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
