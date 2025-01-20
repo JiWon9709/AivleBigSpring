@@ -14,7 +14,7 @@ public class ClntCoListResponse {
   /**
    * 의뢰사고유번호
    */
-  @ApiModelProperty(notes = "의뢰사고유번호", position = 1)
+  @ApiModelProperty(notes = "의뢰사고유번호1", position = 1)
   private Long clntCoSn;
 
   /**
