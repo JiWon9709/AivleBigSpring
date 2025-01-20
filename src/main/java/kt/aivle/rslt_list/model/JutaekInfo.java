@@ -45,4 +45,22 @@ public class JutaekInfo {
    */
   @ApiModelProperty(required = true, notes = "기타공간", position = 6)
   private String otherArea;
+
+  /**
+   * 주택타입
+   */
+  @ApiModelProperty(required = true, notes = "주택타입", position = 7)
+  private String jutaekType;
+
+  /**
+   * 보증금
+   */
+  @ApiModelProperty(required = true, notes = "보증금", position = 7)
+  private String guarantee;
+
+  /**
+   * 월세
+   */
+  @ApiModelProperty(required = true, notes = "월세", position = 8)
+  private String monthly;
 }
