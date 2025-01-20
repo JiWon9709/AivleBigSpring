@@ -1,27 +1,28 @@
 package kt.aivle.input.service;
 
 import kt.aivle.input.model.DTO.InputRequestDTO;
-import kt.aivle.input.model.entity.UserInput;
-import kt.aivle.input.repository.InputRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class InputService {
 
-    private final InputRepository inputRepository;
+    private final JdbcTemplate jdbcTemplate;
+
+    public InputService(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     public void saveInput(InputRequestDTO inputRequestDTO) {
-
-        UserInput userInput = new UserInput();
-        userInput.setUserSn(inputRequestDTO.getUserSn());
-        userInput.setGongoSn(inputRequestDTO.getGongoSn());
-        userInput.setInputType(inputRequestDTO.getInputType());
-        userInput.setInputRank(inputRequestDTO.getInputRank());
-        userInput.setInputScore(inputRequestDTO.getInputScore());
-        inputRepository.save(userInput);
+        String sql = "INSERT INTO user_input (user_sn, gongo_sn, input_type, input_rank, input_score) " +
+                "VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql,
+                inputRequestDTO.getUserSn(),
+                inputRequestDTO.getGongoSn(),
+                inputRequestDTO.getInputType(),
+                inputRequestDTO.getInputRank(),
+                inputRequestDTO.getInputScore()
+        );
     }
 }
-
 
