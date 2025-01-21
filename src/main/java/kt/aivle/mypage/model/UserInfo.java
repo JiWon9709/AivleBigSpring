@@ -9,8 +9,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class UserInfo {
     private static final long serialVersionUID = 1L;
-//    private int resultCode =  BaseMsg.SUCCESS.getCode();
-//    private String resultMsg = BaseMsg.SUCCESS.getValue();
+
     /**
      * 사용자번호
      */
