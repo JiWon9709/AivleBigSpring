@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kt.aivle.input.mapper.InputMapper">
+
+    <insert
+            id="regInput"
+            parameterType="kt.aivle.input.model.DTO.InputRequestDTO"
+    >
+        /* kt.aivle.input.InputMapper.regInput*/
+        INSERT INTO input
+        (user_sn, gongo_sn, input_type, input_rank, input_score)
+        VALUES (
+        #{userSn}
+        , #{gongoSn}
+        , #{inputType}
+        , #{inputRank}
+        , #{inputScore}
+        );
+    </insert>
+
+
+
+</mapper>
