@@ -57,7 +57,8 @@
         j.jutaek_name AS jutaekName,
         jd.jutaek_size AS jutaekSize,
         j.jutaek_address AS jutaekAddress,
-        gd.gongo_type AS gongoType
+        gd.gongo_type AS gongoType,
+        f.favorite_sn AS favoriteSn
         FROM
         favorite f
         JOIN
@@ -69,4 +70,16 @@
         WHERE
         f.user_sn = #{userSn}
     </select>
+
+    <!-- 관심주택 삭제 -->
+    <delete id="deleteFavorite" parameterType="int">
+        DELETE FROM favorite
+        WHERE favorite_sn = #{favoriteSn}
+    </delete>
+
+    <!-- 회원탈퇴 -->
+    <delete id="deleteUser" parameterType="int">
+        DELETE FROM user
+        WHERE user_sn = #{userSn}
+    </delete>
 </mapper>

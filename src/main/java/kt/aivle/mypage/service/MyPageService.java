@@ -69,6 +69,25 @@ public class MyPageService {
         }
     }
 
+    public boolean checkPassword(UserPwRequest userPwRequest) {
+        UserPwRequest pwRequest = new UserPwRequest();
+        try {
+            pwRequest.setUserSn(userPwRequest.getUserSn());
+            pwRequest.setCurrentPassword(userPwRequest.getCurrentPassword()); // 주의: 비밀번호는 해싱해야 함
+            int validPassword = myPageMapper.verifyPassword(pwRequest);
+
+            if (validPassword == 0) {
+                // 현재 비밀번호가 일치하지 않음
+                return false;
+            }
+            else {
+                return true;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * 비밀번호변경
      *
@@ -116,4 +135,15 @@ public class MyPageService {
         }
         return response;
     }
+
+    public boolean deleteFavorite(int favoriteSn) {
+        int rowsAffected = myPageMapper.deleteFavorite(favoriteSn);
+        return rowsAffected > 0; // 삭제 성공 여부 반환
+    }
+
+    public void deleteUser(int userSn) {
+        myPageMapper.deleteUser(userSn);
+    }
+
+
 }

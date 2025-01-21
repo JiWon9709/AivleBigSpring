@@ -46,4 +46,8 @@ public interface MyPageMapper {
      * @return
      */
     public List<FavoriteResponse> getUserFavorite(int usersn);
+
+    public int deleteFavorite(int favoriteSn);
+
+    public void deleteUser(int usersn);
 }
