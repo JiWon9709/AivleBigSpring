@@ -2,6 +2,7 @@ package kt.aivle.rslt_list.mapper;
 
 import kt.aivle.base.config.mapper.DATA_SOURCE;
 import kt.aivle.clnt_co.model.TestList;
+import kt.aivle.rslt_list.model.JutaekDtlInfo;
 import kt.aivle.rslt_list.model.JutaekInfo;
 import kt.aivle.rslt_list.model.JutaekListRequest;
 
@@ -48,4 +49,12 @@ public interface RsltListMapper {
    * @return
    */
   public List<JutaekInfo> getJutaekList(JutaekListRequest jutaekListRequest);
+
+  /**
+   * 주택 상세정보 조회
+   *
+   * @param jutaekDtlSn
+   * @return
+   */
+  public JutaekDtlInfo getJutaekDtl(Long jutaekDtlSn);
 }

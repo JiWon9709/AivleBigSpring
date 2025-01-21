@@ -5,6 +5,8 @@ import io.swagger.annotations.*;
 import kt.aivle.base.BaseMsg;
 import kt.aivle.base.BaseResListModel;
 import kt.aivle.base.BaseResModel;
+import kt.aivle.rslt_list.model.JutaekDtlInfo;
+import kt.aivle.rslt_list.model.JutaekDtlRequest;
 import kt.aivle.rslt_list.model.JutaekInfo;
 import kt.aivle.rslt_list.model.JutaekListRequest;
 import kt.aivle.rslt_list.service.RsltListService;
@@ -47,6 +49,23 @@ public class RsltListController {
       jutaekListRequest.setMinMonthly(minMonthly);
       jutaekListRequest.setMaxMonthly(maxMonthly);
       response = rsltListService.rsltList(jutaekListRequest);
+    } catch (Exception e) {
+      response.setResultMsg(e.getMessage());
+      response.setResultCode(BaseMsg.FAILED.getCode());
+    }
+    return response;
+  }
+
+  @ApiOperation(value = "주택상세정보")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResModel.class)})
+  @GetMapping(value = "/jutaek_dtl", produces = MediaType.APPLICATION_JSON_VALUE)
+  public BaseResModel<JutaekDtlInfo> rsltList(
+      @ApiParam(value = "주택상세고유번호", required = true) @RequestParam Long jutaekDtlSn) {
+    BaseResModel<JutaekDtlInfo> response = new BaseResModel();
+    try {
+      JutaekDtlRequest jutaekDtlRequest = new JutaekDtlRequest();
+      jutaekDtlRequest.setJutaekDtlSn(jutaekDtlSn);
+      response = rsltListService.jutaekDtl(jutaekDtlRequest);
     } catch (Exception e) {
       response.setResultMsg(e.getMessage());
       response.setResultCode(BaseMsg.FAILED.getCode());
