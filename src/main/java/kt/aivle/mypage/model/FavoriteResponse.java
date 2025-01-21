@@ -8,6 +8,12 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class FavoriteResponse {
     /**
+     * favorite_sn : 관심주택 삭제를 위해 추가
+     */
+    @ApiModelProperty(notes="favorite_sn", position=5)
+    private int favoriteSn;
+
+    /**
      * 주택 이름
      */
     @ApiModelProperty(notes = "주택 이름", position = 1)
