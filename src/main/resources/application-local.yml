@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    jdbc-url: jdbc:mysql://127.0.0.1:3306/aivlebig?autoReconnect=true&characterEncoding=UTF-8&allowMultiQueries=true&useAffectedRows=true
+    username: root
+    password: 'MySQL123!'
+
+
+  email:
+
+secret:
+  access: acc
+  refresh: ref
