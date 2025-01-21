@@ -97,6 +97,8 @@
     , jd.jutaek_type
     , jd.guarantee
     , jd.monthly
+    , j.jutaek_name
+    , j.jutaek_address
     FROM jutaek_dtl AS jd
     LEFT JOIN jutaek AS j ON j.jutaek_sn = jd.jutaek_sn
     WHERE jd.jutaek_sn IN(
@@ -113,7 +115,7 @@
   <!--주택 상세정보 조회 -->
   <select
     id="getJutaekDtl"
-    resultType="kt.aivle.rslt_list.model.JutaekInfo"
+    resultType="kt.aivle.rslt_list.model.JutaekDtlInfo"
   >
     /* kt.aivle.rslt_list.RsltListMapper.getJutaekDtl*/
     SELECT
@@ -123,7 +125,12 @@
     , jd.residential_area
     , jd.common_area
     , jd.other_area
+    , j.jutaek_name
+    , j.jutaek_address
+    , j.longitude
+    , j.latitude
     FROM jutaek_dtl AS jd
+    LEFT JOIN jutaek AS j ON j.jutaek_sn = jd.jutaek_sn
     WHERE jd.jutaek_dtl_sn = #{jutaekDtlSn}
   </select>
 

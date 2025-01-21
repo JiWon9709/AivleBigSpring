@@ -1,13 +1,12 @@
 package kt.aivle.rslt_list.model;
 
 import io.swagger.annotations.ApiModelProperty;
-import kt.aivle.base.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class JutaekInfo {
+public class JutaekDtlInfo {
   private static final long serialVersionUID = 1L;
 
   /**
@@ -75,4 +74,16 @@ public class JutaekInfo {
    */
   @ApiModelProperty(required = true, notes = "주소", position = 10)
   private String jutaekAddress;
+
+  /**
+   * 경도
+   */
+  @ApiModelProperty(required = true, notes = "경도", position = 11)
+  private String longitude;
+
+  /**
+   * 위도
+   */
+  @ApiModelProperty(required = true, notes = "위도", position = 12)
+  private String latitude;
 }
