@@ -7,7 +7,7 @@ import lombok.Setter;
 public class InputRequestDTO {
     private Integer userSn;
     private Integer gongoSn;
-    private Integer inputType;
+    private String inputType;
     private Integer inputRank;
     private Integer inputScore;
 }
