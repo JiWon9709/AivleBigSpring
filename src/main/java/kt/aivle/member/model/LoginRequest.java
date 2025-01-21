@@ -1,9 +1,9 @@
-package kt.aivle.member.model.dto;
+package kt.aivle.member.model;
 
 import lombok.Data;
 
 @Data
-public class LoginRequestDTO {
+public class LoginRequest {
     private String email;
     private String password;
 }

@@ -1,8 +1,8 @@
-package kt.aivle.gongo1111.api;
+package kt.aivle.gongo.api;
 
-import kt.aivle.gongo1111.model.dto.GongoDTO;
-import kt.aivle.gongo1111.service.GongoService;
-import kt.aivle.member.model.dto.ResponseDTO;
+import kt.aivle.gongo.model.Gongo;
+import kt.aivle.gongo.service.GongoService;
+import kt.aivle.member.model.UserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +20,12 @@ public class GongoController {
     @GetMapping("/active")
     public ResponseEntity<?> getActiveGongos() {
         try {
-            List<GongoDTO> activeGongos = gongoService.getActiveGongos();
+            List<Gongo> activeGongos = gongoService.getActiveGongos();
             return ResponseEntity.ok()
-                    .body(new ResponseDTO(200, "조회성공", activeGongos));
+                    .body(new UserException(200, "조회성공", activeGongos));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
-                    .body(new ResponseDTO(400, e.getMessage()));
+                    .body(new UserException(400, e.getMessage()));
         }
     }
 }

@@ -1,12 +1,11 @@
-package kt.aivle.gongo1111.model.dto;
+package kt.aivle.gongo.model;
 
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-public class GongoDTO {
+public class Gongo {
     private Long gongoSn;
     private String gongoName;
     private String scheduleStartDt;

@@ -1,4 +1,4 @@
-package kt.aivle.member.model.entity;
+package kt.aivle.member.model;
 
 import lombok.Data;
 
