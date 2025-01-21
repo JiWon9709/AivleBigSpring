@@ -35,4 +35,38 @@
         use_yn = 'Y'
         WHERE user_sn = #{userSn}
     </update>
+
+    <!-- 사용자 비밀번호 검증 -->
+    <select id="verifyPassword" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM user
+        WHERE user_sn = #{userSn} AND password = #{currentPassword}
+    </select>
+
+    <!-- 비밀번호 업데이트 -->
+    <update id="updatePw" parameterType="map">
+        UPDATE user
+        SET password = #{newPassword}
+        WHERE user_sn = #{userSn}
+    </update>
+
+    <!-- 관심주택불러오기 -->
+    <select id="getUserFavorite"
+            resultType="kt.aivle.mypage.model.FavoriteResponse">
+        SELECT
+        j.jutaek_name AS jutaekName,
+        jd.jutaek_size AS jutaekSize,
+        j.jutaek_address AS jutaekAddress,
+        gd.gongo_type AS gongoType
+        FROM
+        favorite f
+        JOIN
+        jutaek_dtl jd ON f.jutaek_dtl_sn = jd.jutaek_dtl_sn
+        JOIN
+        jutaek j ON jd.jutaek_sn = j.jutaek_sn
+        LEFT JOIN
+        gongo_dtl gd ON f.gongo_sn = gd.gongo_sn
+        WHERE
+        f.user_sn = #{userSn}
+    </select>
 </mapper>
