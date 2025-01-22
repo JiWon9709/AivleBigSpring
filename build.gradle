@@ -1,40 +1,26 @@
-buildscript{
-	ext{
-		springBootVersion = '2.5.3'
+buildscript {
+	ext {
+		springBootVersion = '2.5.3' // 최신 버전으로 업데이트 고려
 	}
-	repositories{
+	repositories {
 		mavenLocal()
 		mavenCentral()
-		jcenter()
 	}
-	dependencies{
+	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 	}
 }
 
 apply plugin: 'java'
 apply plugin: 'idea'
-
 apply plugin: 'maven-publish'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-repositories {
-	mavenLocal()
-	mavenCentral()
-}
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
-
-//configurations {
-//	compileOnly {
-//		extendsFrom annotationProcessor
-//	}
-//}
+group = 'aivle'
+version = '0.0.1'
+description = 'AivleBigSpring'
+sourceCompatibility = '17'
 
 repositories {
 	mavenCentral()
@@ -44,71 +30,44 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
 	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	implementation group: 'com.github.ulisesbocchio', name: 'jasypt-spring-boot-starter', version: '3.0.2'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+	implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.5'
-	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.7'
-	implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
-	implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
-	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
-	implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.2'
-	implementation group: 'com.github.joschi.jackson', name: 'jackson-datatype-threetenbp', version: '2.6.4'
-	implementation group: 'org.bgee.log4jdbc-log4j2', name: 'log4jdbc-log4j2-jdbc4.1', version: '1.16'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.1'
-	implementation 'mysql:mysql-connector-java:8.0.26'
-	implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.7.1'
-	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.8.0'
-	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.8.0'
-	implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
-	implementation 'com.zaxxer:HikariCP:3.4.5'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.6'
-	// MySQL JDBC 드라이버
-	implementation 'mysql:mysql-connector-java:8.0.33'
-
-	// Log4jdbc for Log4j2
+	implementation 'com.google.code.gson:gson:2.8.7'
+	implementation 'org.apache.commons:commons-text:1.9'
+	implementation 'commons-io:commons-io:2.8.0'
+	implementation 'org.apache.commons:commons-lang3:3.8.1'
+	implementation 'org.apache.commons:commons-collections4:4.2'
+	implementation 'com.github.joschi.jackson:jackson-datatype-threetenbp:2.6.4'
 	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4:1.16'
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
-}
+	implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
+	implementation 'mysql:mysql-connector-java:8.0.33'
+	implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.1'
+	implementation 'io.springfox:springfox-swagger2:2.8.0'
+	implementation 'io.springfox:springfox-swagger-ui:2.8.0'
+	implementation 'javax.xml.bind:jaxb-api:2.3.1'
+	implementation 'com.zaxxer:HikariCP:3.4.5'
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.6'
 
-//test {
-//	systemProperty 'jasypt.encryptor.password', findProperty("jasypt.encryptor.password")
-//	useJUnitPlatform()
-//}
-
-springBoot {
-	mainClass = 'kt.aivle.AivleApplication'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 bootJar {
-	enabled = true  // Fat JAR 활성화
-	archiveClassifier = 'boot'  // Fat JAR의 접미사를 '-boot'로 설정
+	archiveClassifier = ''
 	mainClass = 'kt.aivle.AivleApplication'
-	manifest {
-		attributes 'Main-Class': 'kt.aivle.AivleApplication'
-	}
 }
 
 jar {
-	enabled = true  // 일반 JAR도 생성
-	archiveClassifier = 'thin'  // 일반 JAR의 접미사를 '-thin'으로 설정
-	manifest {
-		attributes 'Main-Class': 'kt.aivle.AivleApplication'
-	}
+	enabled = false
 }
-
-group = 'aivle'
-version = '0.0.1'
-description = 'AivleBigSpring'
-sourceCompatibility = '17'
 
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
-
