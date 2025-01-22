@@ -87,11 +87,7 @@ springBoot {
 }
 
 jar {
-	manifest {
-		attributes 'Main-Class': 'kt.aivle.AivleApplication'
-	}
-	enabled = true
-	archiveClassifier = ''
+	enabled = false
 }
 
 bootJar {
