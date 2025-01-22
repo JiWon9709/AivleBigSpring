@@ -83,17 +83,20 @@ dependencies {
 //}
 
 springBoot {
-	mainClass = 'kt.aivle.AivleApplication' // Replace with your actual main class
+	mainClass = 'kt.aivle.AivleApplication'
 }
 
 jar {
+	manifest {
+		attributes 'Main-Class': 'kt.aivle.AivleApplication'
+	}
 	enabled = true
-	archiveClassifier = null
+	archiveClassifier = ''
 }
 
 bootJar {
 	enabled = true
-	archiveClassifier = null
+	archiveClassifier = ''
 }
 
 group = 'nexlink'
