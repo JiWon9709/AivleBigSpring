@@ -88,7 +88,7 @@ springBoot {
 
 bootJar {
 	enabled = true  // Fat JAR 활성화
-	archiveClassifier = ''  // Fat JAR의 접미사를 '-boot'로 설정
+	archiveClassifier = 'boot'  // Fat JAR의 접미사를 '-boot'로 설정
 	mainClass = 'kt.aivle.AivleApplication'
 	manifest {
 		attributes 'Main-Class': 'kt.aivle.AivleApplication'
