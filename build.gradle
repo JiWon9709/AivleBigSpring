@@ -86,23 +86,26 @@ springBoot {
 	mainClass = 'kt.aivle.AivleApplication'
 }
 
-jar {
-	enabled = true
-	archiveClassifier = ''
+bootJar {
+	enabled = true  // Fat JAR 활성화
+	archiveClassifier = ''  // Fat JAR의 접미사를 '-boot'로 설정
 	manifest {
 		attributes 'Main-Class': 'kt.aivle.AivleApplication'
 	}
 }
 
-bootJar {
-	enabled = true
-	archiveClassifier = ''
+jar {
+	enabled = true  // 일반 JAR도 생성
+	archiveClassifier = 'thin'  // 일반 JAR의 접미사를 '-thin'으로 설정
+	manifest {
+		attributes 'Main-Class': 'kt.aivle.AivleApplication'
+	}
 }
 
 group = 'aivle'
 version = '0.0.1'
 description = 'AivleBigSpring'
-sourceCompatibility = '11'
+sourceCompatibility = '17'
 
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
