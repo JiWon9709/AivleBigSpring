@@ -2,7 +2,7 @@ spring:
   application:
     name: pmt-service
   profiles:
-    active: local
+    active: dev
   servlet:
     multipart:
       maxFileSize: 1024MB
