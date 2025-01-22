@@ -1,5 +1,5 @@
 # Base image
-FROM openjdk:17-jdk-slim
+FROM openjdk:17-jdk
 
 # 작업 디렉토리 설정
 WORKDIR /app
