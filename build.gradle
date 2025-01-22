@@ -87,7 +87,11 @@ springBoot {
 }
 
 jar {
-	enabled = false
+	enabled = true
+	archiveClassifier = ''
+	manifest {
+		attributes 'Main-Class': 'kt.aivle.AivleApplication'
+	}
 }
 
 bootJar {
@@ -95,7 +99,7 @@ bootJar {
 	archiveClassifier = ''
 }
 
-group = 'nexlink'
+group = 'aivle'
 version = '0.0.1'
 description = 'AivleBigSpring'
 sourceCompatibility = '11'
