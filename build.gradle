@@ -83,7 +83,7 @@ dependencies {
 //}
 
 springBoot {
-	mainClass = 'kt.aivle.PmtApplication' // Replace with your actual main class
+	mainClass = 'kt.aivle.AivleApplication' // Replace with your actual main class
 }
 
 jar {
