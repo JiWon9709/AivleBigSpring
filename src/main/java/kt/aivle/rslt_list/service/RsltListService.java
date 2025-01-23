@@ -2,7 +2,10 @@ package kt.aivle.rslt_list.service;
 
 import kt.aivle.base.BaseMsg;
 import kt.aivle.base.BaseResListModel;
+import kt.aivle.base.BaseResModel;
 import kt.aivle.rslt_list.mapper.RsltListMapper;
+import kt.aivle.rslt_list.model.JutaekDtlInfo;
+import kt.aivle.rslt_list.model.JutaekDtlRequest;
 import kt.aivle.rslt_list.model.JutaekInfo;
 import kt.aivle.rslt_list.model.JutaekListRequest;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +27,7 @@ public class RsltListService {
   private String dir;
 
   /**
-   * 테스트 리스트
+   * 결과 리스트
    *
    * @return
    */
@@ -71,6 +74,29 @@ public class RsltListService {
         List<JutaekInfo> infoList = rsltListMapper.getJutaekList(jutaekListRequest);
         result.setData(infoList);
       }
+    }
+    return result;
+  }
+
+  /**
+   * 주택 상세정보
+   *
+   * @return
+   */
+  @Transactional
+  public BaseResModel<JutaekDtlInfo> jutaekDtl(JutaekDtlRequest jutaekDtlRequest) {
+    BaseResModel<JutaekDtlInfo> result = new BaseResModel();
+    try {
+      JutaekDtlInfo info = rsltListMapper.getJutaekDtl(jutaekDtlRequest.getJutaekDtlSn());
+      if (info.getJutaekSn() > 0) {
+        result.setData(info);
+      } else {
+        result.setResultMsg("조회 결과가 없습니다.");
+        result.setResultCode(BaseMsg.FAILED.getCode());
+      }
+    } catch (Exception e) {
+      result.setResultMsg("조회 중 에러가 발생했습니다." + e);
+      result.setResultCode(BaseMsg.FAILED.getCode());
     }
     return result;
   }

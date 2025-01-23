@@ -1,28 +1,35 @@
 package kt.aivle.input.service;
 
+
+import kt.aivle.base.BaseMsg;
+import kt.aivle.base.BaseResModel;
+import kt.aivle.input.mapper.InputMapper;
 import kt.aivle.input.model.DTO.InputRequestDTO;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class InputService {
 
-    private final JdbcTemplate jdbcTemplate;
+    @Autowired
+    private InputMapper inputMapper;
 
-    public InputService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    /**
+     * 테스트 리스트
+     *
+     * @return
+     */
+    @Transactional
+    public BaseResModel regInput(InputRequestDTO inputRequestDTO) {
+        BaseResModel result = new BaseResModel();
 
-    public void saveInput(InputRequestDTO inputRequestDTO) {
-        String sql = "INSERT INTO user_input (user_sn, gongo_sn, input_type, input_rank, input_score) " +
-                "VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql,
-                inputRequestDTO.getUserSn(),
-                inputRequestDTO.getGongoSn(),
-                inputRequestDTO.getInputType(),
-                inputRequestDTO.getInputRank(),
-                inputRequestDTO.getInputScore()
-        );
+        int cnt = inputMapper.regInput(inputRequestDTO);
+        if (cnt == 0) {
+            result.setResultMsg(BaseMsg.FAILED.getValue());
+            result.setResultCode(BaseMsg.FAILED.getCode());
+        }
+        return result;
     }
 }
-

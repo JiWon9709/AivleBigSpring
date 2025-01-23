@@ -1,8 +1,10 @@
 spring:
   application:
-    name: pmt-service
+    name: Aivle
+
   profiles:
-    active: local
+    active: dev
+
   servlet:
     multipart:
       maxFileSize: 1024MB
@@ -13,16 +15,9 @@ server:
   servlet:
     context-path: /api/
 
-file:
-  path: /Users/bj_develop/Desktop/
-
-img:
-  path: /Users/bj_develop/Desktop/
-  url: /Users/bj_develop/Downloads
-
-#jasypt:
-#  encryptor:
-#    bean: jasyptStringEncryptor
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor
 
 logger:
   stacktrace: true
