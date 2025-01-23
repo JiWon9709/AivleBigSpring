@@ -1,8 +1,10 @@
 spring:
   application:
     name: Aivle
+
   profiles:
     active: dev
+
   servlet:
     multipart:
       maxFileSize: 1024MB
@@ -12,13 +14,6 @@ server:
   port: 7773
   servlet:
     context-path: /api/
-
-file:
-  path: /Users/bj_develop/Desktop/
-
-img:
-  path: /Users/bj_develop/Desktop/
-  url: /Users/bj_develop/Downloads
 
 jasypt:
   encryptor:

@@ -5,6 +5,13 @@ spring:
     username: root
     password: aivle202406
 
+file:
+  path: /Users/bj_develop/Desktop/
+
+img:
+  path: /Users/bj_develop/Desktop/
+  url: /Users/bj_develop/Downloads
+
 
 secret:
   access: acc
