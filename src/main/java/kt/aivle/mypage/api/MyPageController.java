@@ -1,8 +1,10 @@
 package kt.aivle.mypage.api;
 
 import io.swagger.annotations.*;
-import kt.aivle.base.BaseMsg;
-import kt.aivle.mypage.model.*;
+import kt.aivle.mypage.model.FavoriteListResponse;
+import kt.aivle.mypage.model.UserInfo;
+import kt.aivle.mypage.model.UserInfoResponse;
+import kt.aivle.mypage.model.UserPwRequest;
 import kt.aivle.mypage.service.MyPageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 @Slf4j
 @RestController
 @Api(tags = "mypage", description = "mypage API")
-@CrossOrigin(origins = "http://localhost:3000") // React 앱의 도메인 허용
+//@CrossOrigin(origins = "http://localhost:3000") // React 앱의 도메인 허용. SecurityConfig에서 전역으로 CORS 설정해서 개별 설정 불필요.
 public class MyPageController {
 
     @Autowired
