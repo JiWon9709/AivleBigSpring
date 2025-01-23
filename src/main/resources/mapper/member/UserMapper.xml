@@ -22,4 +22,17 @@
         WHERE email = #{email}
         AND use_yn = 'Y'
     </select>
+
+    <select id="findByEmailForAuth" parameterType="String" resultType="kt.aivle.member.model.UserAuth">
+        SELECT email, password
+        FROM user
+        WHERE email = #{email}
+        AND use_yn = 'Y'
+    </select>
+
+    <update id="updatePassword">
+        UPDATE user
+        SET password = #{password}
+        WHERE email = #{email}
+    </update>
 </mapper>

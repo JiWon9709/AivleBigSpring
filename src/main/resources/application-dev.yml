@@ -7,6 +7,17 @@ spring:
     username: root
     password: aivle202406
 
+  mail:
+    username: ${AZURE_KEY_VAULT_MAIL_USERNAME}
+    password: ${AZURE_KEY_VAULT_MAIL_PASSWORD}
+
+jwt:
+  secret: ${AZURE_KEY_VAULT_JWT_SECRET}
+
+cors:
+  allowed-origins:
+    - http://4.217.186.166:3000
+
 #jasypt:
 #  encryptor:
 #    bean: jasyptStringEncryptor
