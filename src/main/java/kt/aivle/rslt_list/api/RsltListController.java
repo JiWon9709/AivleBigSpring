@@ -58,7 +58,7 @@ public class RsltListController {
 
   @ApiOperation(value = "주택상세정보")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResModel.class)})
-  @GetMapping(value = "/jutaek_dtl", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/jutaek-dtl", produces = MediaType.APPLICATION_JSON_VALUE)
   public BaseResModel<JutaekDtlInfo> rsltList(
       @ApiParam(value = "주택상세고유번호", required = true) @RequestParam Long jutaekDtlSn) {
     BaseResModel<JutaekDtlInfo> response = new BaseResModel();
