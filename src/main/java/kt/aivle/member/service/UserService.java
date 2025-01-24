@@ -97,6 +97,7 @@ public class UserService {
 
         String code = generateRandomCode();
         verificationCodes.put(email, new VerificationInfo(code, LocalDateTime.now()));
+        log.info("생성된 인증코드: {}, 저장된 정보 : {}", code, verificationCodes.get(email));
 
         // 이메일 발송
         SimpleMailMessage message = new SimpleMailMessage();
