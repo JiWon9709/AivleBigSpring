@@ -17,7 +17,7 @@
 
 
     <select id="findByEmail" parameterType="String" resultType="kt.aivle.member.model.UserResponse">
-        SELECT *
+        SELECT email, user_name
         FROM user
         WHERE email = #{email}
         AND use_yn = 'Y'
@@ -32,7 +32,8 @@
 
     <update id="updatePassword">
         UPDATE user
-        SET password = #{password}
+        SET password = #{password},
+            updated_at = NOW()
         WHERE email = #{email}
     </update>
 </mapper>

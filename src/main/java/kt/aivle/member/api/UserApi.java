@@ -6,6 +6,7 @@ import kt.aivle.member.service.JwtTokenProvider;
 import kt.aivle.member.service.RefreshTokenService;
 import kt.aivle.member.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,8 +70,19 @@ public class UserApi {
 
 
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(@RequestHeader("Authorization") String refreshToken) {
-        return ResponseEntity.ok(jwtTokenProvider.refreshToken(refreshToken));
+    public ResponseEntity<?> reissue(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String refreshToken = authHeader.substring(7);
+            TokenDto newTokenDto = jwtTokenProvider.refreshToken(refreshToken);
+
+            return ResponseEntity.ok()
+                    .header("Authorization", "Bearer " + newTokenDto.getAccessToken())
+                    .body(new TokenResponse(true, "토큰이 성공적으로 재발급되었습니다.", newTokenDto));
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new TokenResponse(false, "토큰 재발급 실패: " + e.getMessage(), null));
+        }
     }
 
     @ApiOperation(value = "이메일 중복 체크")
@@ -85,28 +97,21 @@ public class UserApi {
 
     }
 
-//    @ApiOperation(value = "비밀번호 찾기 - 인증코드 발송")
-//    @PostMapping("/forgot-password")
-//    public ResponseEntity<?> sendVerificationCode(@RequestBody EmailRequest request) {
-//        try {
-//            String code = userService.sendVerificationCode(request.getEmail());
-//            return ResponseEntity.ok(new UserException(200, "인증코드가 발송되었습니다."));
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest()
-//                    .body(new UserException(400, e.getMessage()));
-//        }
-//    }
-//
-//    @ApiOperation(value = "비밀번호 재설정")
-//    @PostMapping("/reset-password")
-//    public ResponseEntity<?> resetPassword(@RequestBody PasswordResetRequest request) {
-//        try {
-//            String tempPassword = userService.verifyCodeAndResetPassword(request.getEmail(), request.getCode());
-//            return ResponseEntity.ok(new UserException(200, "임시 비밀번호: " + tempPassword));
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest()
-//                    .body(new UserException(400, e.getMessage()));
-//        }
-//    }
+    // 비밀번호 찾기 - 인증코드 전송
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String code = userService.sendVerificationCode(email);
+        return ResponseEntity.ok().body(Map.of("message", "인증코드가 전송되었습니다."));
+    }
+
+    // 인증코드 확인 및 비밀번호 재설정
+    @PostMapping("/verify-code")
+    public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String code = request.get("code");
+        String tempPassword = userService.verifyCodeAndResetPassword(email, code);
+        return ResponseEntity.ok().body(Map.of("message", "임시 비밀번호가 생성되었습니다.", "tempPassword", tempPassword));
+    }
 
 }

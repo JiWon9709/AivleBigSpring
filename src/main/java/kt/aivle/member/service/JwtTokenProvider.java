@@ -35,8 +35,8 @@ public class JwtTokenProvider {
     private Key key;
 
     // 토큰 만료 시간 설정
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30;            // 30분
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7일
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30;   //30분
+    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24;  //24시간
 
     @PostConstruct
     protected void init() {
@@ -44,14 +44,20 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes); // Key 객체 생성
     }
 
-    // Access/Refresh 토큰 생성
+    // 신규 사용자에게 Access/Refresh 토큰 생성
     public TokenDto createToken(String userPk, List<String> roles) {
+        log.debug("Creating Access and Refresh tokens for user: {}, roles: {}", userPk, roles);
+
+
         Claims claims = Jwts.claims().setSubject(userPk);
         claims.put("roles", roles);
 
         long now = (new Date()).getTime();
         Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
         Date refreshTokenExpiresIn = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
+
+        log.info("Access token expiration: {}", accessTokenExpiresIn);
+        log.info("Refresh token expiration: {}", refreshTokenExpiresIn);
 
         String accessToken = Jwts.builder()
                 .setClaims(claims)
@@ -60,9 +66,13 @@ public class JwtTokenProvider {
                 .compact();
 
         String refreshToken = Jwts.builder()
+                .setClaims(claims)
                 .setExpiration(refreshTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+
+        log.info("Access token successfully created.");
+        log.info("Refresh token successfully created.");
 
         return TokenDto.builder()
                 .grantType("Bearer")
@@ -72,17 +82,44 @@ public class JwtTokenProvider {
                 .build();
     }
 
+    // access가 만료되고 refresh토큰은 유효한 사용자에게 access 재발급
+    public TokenDto createAccessTokenByRefresh(String userPk, List<String> roles, String existingRefreshToken) {
+        Claims claims = Jwts.claims().setSubject(userPk);
+        claims.put("roles", roles);
+
+        long now = (new Date()).getTime();
+        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+
+        String accessToken = Jwts.builder()
+                .setClaims(claims)
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        return TokenDto.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .refreshToken(existingRefreshToken)  // 기존 리프레시 토큰 유지
+                .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
+                .build();
+    }
+
+
+
     // 리프레시 토큰 갱신
     public TokenDto refreshToken(String refreshToken) {
-        if (!validateToken(refreshToken)) {
-            throw new RuntimeException("유효하지 않은 Refresh Token입니다.");
+        log.debug("Attempting to refresh token: {}", refreshToken);
+        try {
+            Claims claims = parseClaims(refreshToken);
+            String userPk = claims.getSubject();
+            List<String> roles = claims.get("roles", List.class);
+
+            // 액세스 토큰만 새로 발급
+            return createAccessTokenByRefresh(userPk, roles, refreshToken);
+        } catch (ExpiredJwtException e) {
+            log.warn("Refresh token expired: {}", e.getMessage());
+            throw new RuntimeException("만료된 Refresh Token입니다.");
         }
-
-        Claims claims = parseClaims(refreshToken);
-        String userPk = claims.getSubject();
-        List<String> roles = claims.get("roles", List.class);
-
-        return createToken(userPk, roles);
     }
 
     // 인증 처리
@@ -106,22 +143,21 @@ public class JwtTokenProvider {
 
     // 토큰 검증
     public boolean validateToken(String token) {
+        log.debug("Validating token: {}", token);
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
+            log.info("Token is valid.");
             return true;
-        } catch (SecurityException | MalformedJwtException e) {
-            log.warn("Invalid JWT signature: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
             log.warn("Expired JWT token: {}", e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            log.warn("Unsupported JWT token: {}", e.getMessage());
-        } catch (IllegalArgumentException e) {
-            log.warn("JWT claims string is empty: {}", e.getMessage());
+            throw e;
+        } catch (JwtException e) {
+            log.warn("JWT token error: {}", e.getMessage());
+            throw e;
         }
-        return false;
     }
 
     // Claims 파싱
