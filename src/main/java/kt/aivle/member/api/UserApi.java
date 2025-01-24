@@ -6,6 +6,7 @@ import kt.aivle.member.service.JwtTokenProvider;
 import kt.aivle.member.service.RefreshTokenService;
 import kt.aivle.member.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@Slf4j
 public class UserApi {
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
@@ -89,20 +91,29 @@ public class UserApi {
     @PostMapping("/check-email")
     public ResponseEntity<?> checkEmail(@RequestBody EmailCheckRequest request) {
         boolean exists = userService.checkEmailExists(request.getEmail());
-
         Map<String, Object> response = new HashMap<>();
+        response.put("success", !exists);
+        response.put("message", exists ? "이미 사용 중인 이메일입니다." : "사용 가능한 이메일입니다.");
         response.put("exists", exists);
 
         return ResponseEntity.ok(response);
-
     }
 
-    // 비밀번호 찾기 - 인증코드 전송
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String code = userService.sendVerificationCode(email);
-        return ResponseEntity.ok().body(Map.of("message", "인증코드가 전송되었습니다."));
+        try {
+            String email = request.get("email");
+            String code = userService.sendVerificationCode(email);
+            log.info("인증코드 생성 완료: {}", code);
+
+            userService.sendEmail(email, code);
+            log.info("이메일 발송 완료");
+
+            return ResponseEntity.ok().body(Map.of("message", "인증코드가 전송되었습니다."));
+        } catch (Exception e) {
+            log.error("비밀번호 찾기 처리 중 오류: ", e);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // 인증코드 확인 및 비밀번호 재설정

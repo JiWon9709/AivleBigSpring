@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserService {
 
@@ -49,7 +49,7 @@ public class UserService {
             throw new RuntimeException("비밀번호 암호화 실패", e);
         }
     }
-
+    @Transactional(readOnly = true)
     public UserResponse login(LoginRequest loginRequest) {
         try {
             log.info("로그인 시도 - 이메일: {}", loginRequest.getEmail());
@@ -83,32 +83,42 @@ public class UserService {
     }
 
     public boolean checkEmailExists(String email) {
-        UserResponse userResponse = userMapper.findByEmail(email);
-        return userResponse != null && "Y".equals(userResponse.getUseYn()); // 활성 사용자인 경우만 체크
+        return userMapper.findByEmail(email) != null;
     }
 
     @Transactional
     public String sendVerificationCode(String email) {
-        // 이메일 존재 여부 확인
+        log.info("이메일 인증 코드 발송 시도 - 이메일: {}", email);
+
         UserResponse user = userMapper.findByEmail(email);
+        log.info("조회된 사용자 정보: {}", user);  // null인지 확인
+
         if (user == null || !"Y".equals(user.getUseYn())) {
             throw new IllegalArgumentException("존재하지 않는 이메일입니다.");
         }
 
         String code = generateRandomCode();
         verificationCodes.put(email, new VerificationInfo(code, LocalDateTime.now()));
-        log.info("생성된 인증코드: {}, 저장된 정보 : {}", code, verificationCodes.get(email));
+        log.info("생성된 인증코드: {}", code);
 
-        // 이메일 발송
+        return code;
+    }
+
+    @Async
+    public void sendEmail(String email, String code) {
+        log.info("이메일 발송 시작 - 수신자: {}", email);
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("비밀번호 재설정 인증번호");
         message.setText("인증번호: " + code);
+        message.setFrom("your-email@gmail.com"); // 발신자 이메일 추가
 
         try {
             mailSender.send(message);
-            return code;
+            log.info("이메일 발송 성공 - 수신자: {}", email);
         } catch (MailException e) {
+            log.error("이메일 발송 실패 - 상세 에러: {}", e.getMessage());
             throw new RuntimeException("이메일 발송에 실패했습니다.", e);
         }
     }

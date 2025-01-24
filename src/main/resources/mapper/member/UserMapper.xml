@@ -17,14 +17,14 @@
 
 
     <select id="findByEmail" parameterType="String" resultType="kt.aivle.member.model.UserResponse">
-        SELECT email, user_name
+        SELECT email, user_name, use_yn
         FROM user
         WHERE email = #{email}
         AND use_yn = 'Y'
     </select>
 
     <select id="findByEmailForAuth" parameterType="String" resultType="kt.aivle.member.model.UserAuth">
-        SELECT email, password
+        SELECT email, password, use_yn
         FROM user
         WHERE email = #{email}
         AND use_yn = 'Y'
@@ -33,7 +33,7 @@
     <update id="updatePassword">
         UPDATE user
         SET password = #{password},
-            updated_at = NOW()
+            updated_dt = NOW()
         WHERE email = #{email}
     </update>
 </mapper>
