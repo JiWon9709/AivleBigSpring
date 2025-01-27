@@ -49,6 +49,7 @@ public class UserService {
             throw new RuntimeException("비밀번호 암호화 실패", e);
         }
     }
+
     @Transactional(readOnly = true)
     public UserResponse login(LoginRequest loginRequest) {
         try {
@@ -80,6 +81,11 @@ public class UserService {
             log.error("로그인 중 예외 발생:", e);
             throw e;
         }
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getNameByUserSn(Long userSn) {
+        return userMapper.findNameByUserSn(userSn);
     }
 
     public boolean checkEmailExists(String email) {
