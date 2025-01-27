@@ -17,7 +17,7 @@
 
 
     <select id="findByEmail" parameterType="String" resultType="kt.aivle.member.model.UserResponse">
-        SELECT email, user_name, use_yn
+        SELECT email, user_sn, use_yn
         FROM user
         WHERE email = #{email}
         AND use_yn = 'Y'
@@ -27,6 +27,13 @@
         SELECT email, password, use_yn
         FROM user
         WHERE email = #{email}
+        AND use_yn = 'Y'
+    </select>
+
+    <select id="findNameByUserSn" parameterType="Long" resultType="kt.aivle.member.model.UserResponse">
+        SELECT user_sn, user_name
+        FROM user
+        WHERE user_sn = #{userSn}
         AND use_yn = 'Y'
     </select>
 

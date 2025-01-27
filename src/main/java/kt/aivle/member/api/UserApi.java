@@ -9,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +29,7 @@ public class UserApi {
 
     @ApiOperation(value = "회원가입")
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest signupRequest) {
         try {
             userService.signup(signupRequest);
             return ResponseEntity.ok()
@@ -60,6 +62,34 @@ public class UserApi {
                     .body(new LoginResponse(400, e.getMessage(), null, null));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
+                    .body(new LoginResponse(500, "서버 오류가 발생했습니다.", null, null));
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUserInfo(Authentication authentication) {
+        try{
+            // Authentication 객체에서 userSn 추출
+            Long userSn = Long.valueOf(authentication.getName());
+            UserResponse userInfo = userService.getNameByUserSn(userSn);
+
+            if (userInfo == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new LoginResponse(404, "사용자 정보를 찾을 수 없습니다.", null, null));
+            }
+
+            return ResponseEntity.ok(new LoginResponse(
+                    200,
+                    "사용자 정보 조회 성공",
+                    userInfo,
+                    null  // 토큰 정보는 불필요
+            ));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest()
+                    .body(new LoginResponse(400, "잘못된 사용자 식별자입니다.", null, null));
+        } catch (Exception e) {
+            log.error("사용자 정보 조회 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new LoginResponse(500, "서버 오류가 발생했습니다.", null, null));
         }
     }
@@ -99,10 +129,11 @@ public class UserApi {
         return ResponseEntity.ok(response);
     }
 
+    @ApiOperation(value = "이메일 통한 비밀번호 찾기 요청")
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
         try {
-            String email = request.get("email");
+            String email = request.getEmail();
             String code = userService.sendVerificationCode(email);
             log.info("인증코드 생성 완료: {}", code);
 

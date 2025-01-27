@@ -9,6 +9,7 @@ public class UserResponse {
     private String userName;
     private String email;
     private String gender;
+    private String zipCode;
     private String address;
     private String telno;
     private String useYn;
