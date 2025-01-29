@@ -48,7 +48,7 @@ public class JwtTokenProvider {
     public TokenDto createToken(String userPk, List<String> roles) {
         log.debug("Creating Access and Refresh tokens for user: {}, roles: {}", userPk, roles);
 
-
+        // 토큰에 userPk 사용자 정보 넣어주기
         Claims claims = Jwts.claims().setSubject(userPk);
         claims.put("roles", roles);
 

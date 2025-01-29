@@ -22,7 +22,7 @@ import java.util.Map;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Slf4j
-public class UserApi {
+public class UserController {
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
@@ -66,6 +66,7 @@ public class UserApi {
         }
     }
 
+    @ApiOperation(value = "내 이름 받아오기(헤더)")
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUserInfo(Authentication authentication) {
         try{
@@ -94,13 +95,14 @@ public class UserApi {
         }
     }
 
+    @ApiOperation(value = "로그아웃")
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         // 로그아웃 처리에 대한 로직 없음 (클라이언트에서만 토큰 삭제)
         return ResponseEntity.ok("로그아웃 성공");
     }
 
-
+    @ApiOperation(value = "토큰 재발급 요청")
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@RequestHeader("Authorization") String authHeader) {
         try {
@@ -148,6 +150,7 @@ public class UserApi {
     }
 
     // 인증코드 확인 및 비밀번호 재설정
+    @ApiOperation(value = "인증코드 확인 및 비밀번호 재설정")
     @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> request) {
         String email = request.get("email");
