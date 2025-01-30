@@ -11,7 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import javax.servlet.http.Cookie;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,7 +46,9 @@ public class UserController {
 
     @ApiOperation(value = "로그인")
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(
+            @RequestBody LoginRequest loginRequest,
+            HttpServletResponse response) {
         try {
             UserResponse userResponse = userService.login(loginRequest);
             TokenDto tokenDto = jwtTokenProvider.createToken(
@@ -51,18 +56,80 @@ public class UserController {
                     Collections.singletonList("ROLE_USER")
             );
 
+            //Access Token을 HttpOnly 쿠키에 설정
+            Cookie accessTokenCookie = new Cookie("access_token", tokenDto.getAccessToken());
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
+            accessTokenCookie.setPath("/");
+            accessTokenCookie.setMaxAge((int) (JwtTokenProvider.ACCESS_TOKEN_EXPIRE_TIME / 1000)); // 30분
+            //accessTokenCookie.setSameSite("Strict"); //  CSRF 방어, https 변경 후 CookieSerializer 사용해서 적용 가능
+
+
+            // Refresh Token을 HttpOnly 쿠키에 설정
+            Cookie refreshTokenCookie = new Cookie("refresh_token", tokenDto.getRefreshToken());
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge((int) (JwtTokenProvider.REFRESH_TOKEN_EXPIRE_TIME / 1000)); // 24시간
+            //refreshTokenCookie.setSameStie("Strict"); //  CSRF 방어, https 변경 후 CookieSerializer 사용해서 적용 가능
+
+
+            response.addCookie(accessTokenCookie);
+            response.addCookie(refreshTokenCookie);
+
             return ResponseEntity.ok(new LoginResponse(
                     200,
                     "로그인이 완료되었습니다.",
-                    userResponse,
-                    tokenDto
+                    userResponse
             ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
-                    .body(new LoginResponse(400, e.getMessage(), null, null));
+                    .body(new LoginResponse(400, e.getMessage(), null));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
-                    .body(new LoginResponse(500, "서버 오류가 발생했습니다.", null, null));
+                    .body(new LoginResponse(500, "서버 오류가 발생했습니다.", null));
+        }
+    }
+
+    @ApiOperation(value = "토큰 재발급 요청")
+    @PostMapping("/reissue")
+    public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            // 쿠키에서 refresh token 추출
+            Cookie[] cookies = request.getCookies();
+            String refreshToken = null;
+
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if (cookie.getName().equals("refresh_token")) {
+                        refreshToken = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+
+            if (refreshToken == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new TokenResponse(false, "Refresh Token이 없습니다.", null));
+            }
+
+            // 토큰 재발급
+            TokenDto newTokenDto = jwtTokenProvider.refreshToken(refreshToken);
+
+            // 새로운 Access Token을 쿠키에 설정
+            Cookie accessTokenCookie = new Cookie("access_token", newTokenDto.getAccessToken());
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
+            accessTokenCookie.setPath("/");
+
+            response.addCookie(accessTokenCookie);
+
+            return ResponseEntity.ok()
+                    .body(new TokenResponse(true, "토큰이 성공적으로 재발급되었스빈다.", null));
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new TokenResponse(false, "토큰 재발급 실패: " + e.getMessage(), null));
         }
     }
 
@@ -76,48 +143,48 @@ public class UserController {
 
             if (userInfo == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new LoginResponse(404, "사용자 정보를 찾을 수 없습니다.", null, null));
+                        .body(new LoginResponse(404, "사용자 정보를 찾을 수 없습니다.", null));
             }
 
             return ResponseEntity.ok(new LoginResponse(
                     200,
                     "사용자 정보 조회 성공",
-                    userInfo,
-                    null  // 토큰 정보는 불필요
+                    userInfo
             ));
         } catch (NumberFormatException e) {
             return ResponseEntity.badRequest()
-                    .body(new LoginResponse(400, "잘못된 사용자 식별자입니다.", null, null));
+                    .body(new LoginResponse(400, "잘못된 사용자 식별자입니다.", null));
         } catch (Exception e) {
             log.error("사용자 정보 조회 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new LoginResponse(500, "서버 오류가 발생했습니다.", null, null));
+                    .body(new LoginResponse(500, "서버 오류가 발생했습니다.", null));
         }
     }
 
     @ApiOperation(value = "로그아웃")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        // 로그아웃 처리에 대한 로직 없음 (클라이언트에서만 토큰 삭제)
-        return ResponseEntity.ok("로그아웃 성공");
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        // Access Token 쿠키 삭제
+        Cookie accesTokenCookie = new Cookie("access_token", null);
+        accesTokenCookie.setHttpOnly(true);
+        accesTokenCookie.setSecure(true);
+        accesTokenCookie.setMaxAge(0);
+        accesTokenCookie.setPath("/");
+
+        // Refresh Token 쿠키 삭제
+        Cookie refreshTokenCookie = new Cookie("refresh_token", null);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setMaxAge(0);
+        refreshTokenCookie.setPath("/");
+
+        response.addCookie(accesTokenCookie);
+        response.addCookie(refreshTokenCookie);
+
+        return ResponseEntity.ok().build();
     }
 
-    @ApiOperation(value = "토큰 재발급 요청")
-    @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(@RequestHeader("Authorization") String authHeader) {
-        try {
-            String refreshToken = authHeader.substring(7);
-            TokenDto newTokenDto = jwtTokenProvider.refreshToken(refreshToken);
 
-            return ResponseEntity.ok()
-                    .header("Authorization", "Bearer " + newTokenDto.getAccessToken())
-                    .body(new TokenResponse(true, "토큰이 성공적으로 재발급되었습니다.", newTokenDto));
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new TokenResponse(false, "토큰 재발급 실패: " + e.getMessage(), null));
-        }
-    }
 
     @ApiOperation(value = "이메일 중복 체크")
     @PostMapping("/check-email")

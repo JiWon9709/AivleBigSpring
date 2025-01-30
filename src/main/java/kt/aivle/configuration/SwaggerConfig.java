@@ -7,17 +7,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiKey;
-import springfox.documentation.service.SecurityReference;
+import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger.web.UiConfiguration;
 import springfox.documentation.swagger.web.UiConfigurationBuilder;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-import springfox.documentation.service.AuthorizationScope;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,9 +45,10 @@ public class SwaggerConfig implements WebMvcConfigurer {
         .paths(PathSelectors.any())
         .build()
         .useDefaultResponseMessages(false)
-        // JWT 인증 설정 추가
-        .securityContexts(Collections.singletonList(securityContext()))
-        .securitySchemes(Collections.singletonList(apiKey()));
+        .securityContexts(Collections.singletonList(securityContext())) // 쿠키 기반 보안 설정
+        .securitySchemes(Collections.singletonList(cookieScheme())) // 헤더 대신 쿠키 사용
+        // 쿠키 관련 설정 추가
+        .apiInfo(apiInfo());
   }
 
   //swagger 설정.
@@ -79,24 +79,32 @@ public class SwaggerConfig implements WebMvcConfigurer {
     registry.addResourceHandler("/webjars/**")
             .addResourceLocations("classpath:/META-INF/resources/webjars/");
   }
-  // JWT 인증을 위한 ApiKey 설정
-  private ApiKey apiKey() {
-    return new ApiKey("JWT", "Authorization", "header");
+
+  private ApiInfo apiInfo(){
+    return new ApiInfoBuilder()
+            .title("API Documentation")
+            .description("쿠키 기반 인증을 사용합니다. /users/login API를 실행하면 자동으로 쿠키가 설정됩니다. ")
+            .build();
   }
 
-  // 보안 컨텍스트 설정
+
+  // ✅ JWT 인증을 "쿠키" 기반으로 설정
+  private SecurityScheme cookieScheme() {
+    return new ApiKey("JSESSIONID", "JSESSIONID", "cookie"); // ✅ 쿠키 기반 인증
+  }
+
   private SecurityContext securityContext() {
     return SecurityContext.builder()
             .securityReferences(defaultAuth())
             .build();
   }
 
-  // Security Reference 설정
   private List<SecurityReference> defaultAuth() {
     AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
     AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
     authorizationScopes[0] = authorizationScope;
-    return Collections.singletonList(new SecurityReference("JWT", authorizationScopes));
+    return Collections.singletonList(new SecurityReference("JSESSIONID", authorizationScopes));
   }
+
 }
 
