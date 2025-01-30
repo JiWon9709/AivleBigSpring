@@ -13,7 +13,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -57,7 +56,6 @@ public class SecurityConfig {
                 .antMatchers(
                         "/users/login",
                         "/users/signup",
-                        "/users/logout",
                         "/users/check-email",
                         "/users/forgot-password",
                         "/users/verify-code",
@@ -66,8 +64,8 @@ public class SecurityConfig {
                 .antMatchers("/users/reissue").authenticated()  // JWT 검증 필요
                 .anyRequest().authenticated()
                 .and()
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtAuthenticationFilter, AnonymousAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                //.addFilterBefore(jwtAuthenticationFilter, AnonymousAuthenticationFilter.class);
 
         return http.build();
     }
@@ -78,7 +76,10 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Refresh"));
+        /*
+        * 현재는 Headers 전체 허용하고 있으나, 보안강화 하고 싶다면 프론트에서 보내는 header 파악해서
+        * 허용하는 것 필요
+        * */
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
