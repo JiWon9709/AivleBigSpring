@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +35,26 @@ public class SecurityConfig {
     private List<String> allowedOrigins;
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().antMatchers(
+                "/api/users/login",
+                "/api/users/signup",
+                "/api/users/reissue",
+                "/api/gongo/active",
+                "/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/security",
+                "/swagger-ui.html",
+                "/webjars/**",
+                "/swagger-ui/**",
+                "/api/board",
+                "/api/post-board"
+        );
+    }
+
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors().configurationSource(corsConfigurationSource())
@@ -51,13 +72,17 @@ public class SecurityConfig {
                         "/swagger-ui/**", // Swagger UI 엔드포인트
                         "/v2/api-docs",   // API 문서 엔드포인트
                         "/swagger-resources/**", // Swagger 리소스
-                        "/webjars/**" // Swagger를 위한 웹 리소스
+                        "/webjars/**", // Swagger를 위한 웹 리소스
+                        "/api/**"
                 ).permitAll()
                 .antMatchers(
                         "/users/login",
                         "/users/signup",
                         "/users/check-email",
                         "/users/forgot-password",
+                        "/gongo/active",
+                        "/post-board",
+                        "/board",
                         "/users/verify-code",
                         "/gongo/active"
                 ).permitAll()
@@ -69,6 +94,17 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+    // 아래 메서드와 중복이라 제거
+//    @Bean
+//    public CorsConfiguration corsConfiguration() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.addAllowedOrigin("http://localhost:3000"); // 배포 환경에 따라 변경 필요
+//        configuration.addAllowedHeader("*");
+//        configuration.addAllowedMethod("*");
+//        configuration.setAllowCredentials(true);
+//        return configuration;
+//    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
