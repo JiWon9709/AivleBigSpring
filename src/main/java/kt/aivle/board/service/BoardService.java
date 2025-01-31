@@ -3,6 +3,7 @@ package kt.aivle.board.service;
 import kt.aivle.board.mapper.BoardMapper;
 import kt.aivle.board.model.Board;
 import kt.aivle.board.model.BoardListResponse;
+import kt.aivle.board.model.BoardRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,5 +24,13 @@ public class BoardService {
             throw new RuntimeException(e);
         }
         return boardlist;
+    }
+
+    public void savePost(Board board) {
+        Board post = new Board();
+        post.setTitle(board.getTitle());
+        post.setContent(board.getContent());
+        post.setUserSn(board.getUserSn());
+        boardMapper.saveboard(post);
     }
 }
