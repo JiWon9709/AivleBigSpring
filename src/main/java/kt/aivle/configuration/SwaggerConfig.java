@@ -90,7 +90,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
 
   // ✅ JWT 인증을 "쿠키" 기반으로 설정
   private SecurityScheme cookieScheme() {
-    return new ApiKey("JSESSIONID", "JSESSIONID", "cookie"); // ✅ 쿠키 기반 인증
+    return new ApiKey("accessToken", "accessToken", "cookie"); // ✅ 쿠키 기반 인증
   }
 
   private SecurityContext securityContext() {
@@ -103,7 +103,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
     AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
     AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
     authorizationScopes[0] = authorizationScope;
-    return Collections.singletonList(new SecurityReference("JSESSIONID", authorizationScopes));
+    return Collections.singletonList(new SecurityReference("accessToken", authorizationScopes));
   }
 
 }
