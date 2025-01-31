@@ -3,14 +3,12 @@ package kt.aivle.member.model;
 import lombok.Data;
 
 @Data
-public class UserResponse {
+public class UserProfileResponse {
     private Integer userSn;
-    private String password;
     private String userName;
     private String email;
-    private String gender;
-    private String zipCode;
-    private String address;
     private String telno;
-    private String useYn;
+    private String address;
+    private String zipCode;
+    private String gender;
 }

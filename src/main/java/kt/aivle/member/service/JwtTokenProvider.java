@@ -31,12 +31,10 @@ public class JwtTokenProvider {
 
     @Value("${jwt.secret}")
     private String secretKey;
-
     private Key key;
-
     // 토큰 만료 시간 설정
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30;   //30분
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24;  //24시간
+    public static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30;   //30분
+    public static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24;  //24시간
 
     @PostConstruct
     protected void init() {
@@ -48,7 +46,7 @@ public class JwtTokenProvider {
     public TokenDto createToken(String userPk, List<String> roles) {
         log.debug("Creating Access and Refresh tokens for user: {}, roles: {}", userPk, roles);
 
-
+        // 토큰에 userPk 사용자 정보 넣어주기
         Claims claims = Jwts.claims().setSubject(userPk);
         claims.put("roles", roles);
 
@@ -82,7 +80,7 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    // access가 만료되고 refresh토큰은 유효한 사용자에게 access 재발급
+    // refresh 토큰 이용한 access 재발급
     public TokenDto createAccessTokenByRefresh(String userPk, List<String> roles, String existingRefreshToken) {
         Claims claims = Jwts.claims().setSubject(userPk);
         claims.put("roles", roles);
@@ -105,8 +103,7 @@ public class JwtTokenProvider {
     }
 
 
-
-    // 리프레시 토큰 갱신
+    // access 만료되어서 reissue 요청한 사용자에 대해 리프레시 토큰 이용한 access 토큰 재발급
     public TokenDto refreshToken(String refreshToken) {
         log.debug("Attempting to refresh token: {}", refreshToken);
         try {
