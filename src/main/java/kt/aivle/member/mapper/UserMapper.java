@@ -12,6 +12,7 @@ public interface UserMapper {
     void insertUser(SignupRequest signupRequest);
     UserAuth findByEmailForAuth(String email); // 로그인 검증용
     UserResponse findByEmail(String email); // 일반 정보 조회용
+    UserResponse findNameByUserSn(Long userSn);
     int updatePassword(@Param("email") String email, @Param("password") String password);
 
 }
