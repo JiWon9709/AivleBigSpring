@@ -5,7 +5,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     jdbc-url: jdbc:mysql://4.217.186.166:3306/aivlebig?autoReconnect=true&characterEncoding=UTF-8&allowMultiQueries=true&useAffectedRows=true
     username: root
-    password: ENC(5ZwCjaE/E+xXYv3+71jvAXvdX9+jlGDq)
+    password: aivle202406
 
   mail:
     host: smtp.gmail.com
