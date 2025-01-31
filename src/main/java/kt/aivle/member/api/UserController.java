@@ -167,14 +167,14 @@ public class UserController {
         // Access Token 쿠키 삭제
         Cookie accesTokenCookie = new Cookie("access_token", null);
         accesTokenCookie.setHttpOnly(true);
-        accesTokenCookie.setSecure(true);
+        accesTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
         accesTokenCookie.setMaxAge(0);
         accesTokenCookie.setPath("/");
 
         // Refresh Token 쿠키 삭제
         Cookie refreshTokenCookie = new Cookie("refresh_token", null);
         refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
         refreshTokenCookie.setMaxAge(0);
         refreshTokenCookie.setPath("/");
 
