@@ -38,7 +38,7 @@
   <!-- 방금 입력한 input sn 찾기 -->
   <select
     id="getActiveInputSn"
-    resultType="Integer"
+    resultType="Long"
   >
     /* kt.aivle.rslt_list.RsltListMapper.getActiveInputSn*/
     SELECT COALESCE(
@@ -124,8 +124,16 @@
     , jd.common_area
     , jd.other_area
     , jd.jutaek_type
-    , jd.guarantee
-    , jd.monthly
+    <choose>
+      <when test="inputRank == 1">
+        , jd.a_guarantee AS guarantee
+        , jd.a_monthly AS monthly
+      </when>
+      <otherwise>
+        , jd.b_guarantee AS guarantee
+        , jd.b_monthly AS monthly
+      </otherwise>
+    </choose>
     , j.jutaek_name
     , j.jutaek_address
     FROM jutaek_dtl AS jd
