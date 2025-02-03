@@ -107,7 +107,7 @@ public class UserService {
 
         String code = generateRandomCode();
         verificationCodes.put(email, new VerificationInfo(code, LocalDateTime.now()));
-        log.info("생성된 인증코드: {}", code);
+
 
         return code;
     }
@@ -176,7 +176,7 @@ public class UserService {
 
         VerificationInfo info = verificationCodes.get(email);
         if (info == null || !info.getVerificationCode().equals(code)) {
-            log.warn("인증번호 불일치 - 이메일: {}, 입력된 코드: {}", email, code);
+
             throw new IllegalArgumentException("잘못된 인증번호입니다.");
         }
 
@@ -189,7 +189,6 @@ public class UserService {
 
         // 임시 비밀번호 생성 및 저장
         String tempPassword = generateTempPassword();
-        log.info("임시 비밀번호 생성 완료 - 이메일: {}", email);
 
         try {
             String encryptedPassword = Sha256Util.encrypt(tempPassword);

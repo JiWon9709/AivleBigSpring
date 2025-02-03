@@ -204,7 +204,7 @@ public class UserController {
         try {
             String email = request.getEmail();
             String code = userService.sendVerificationCode(email);
-            log.info("인증코드 생성 완료: {}", code);
+            log.info("인증코드 생성 완료: 이메일: {}", email);
 
             userService.sendEmail(email, code);
             log.info("이메일 발송 완료");
@@ -217,13 +217,37 @@ public class UserController {
     }
 
     // 인증코드 확인 및 비밀번호 재설정
-    @ApiOperation(value = "인증코드 확인 및 비밀번호 재설정")
+    @ApiOperation(value = "인증코드 확인 및 임시 비밀번호 발급")
     @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String code = request.get("code");
-        String tempPassword = userService.verifyCodeAndResetPassword(email, code);
-        return ResponseEntity.ok().body(Map.of("message", "임시 비밀번호가 생성되었습니다.", "tempPassword", tempPassword));
+        try {
+            String tempPassword = userService.verifyCodeAndResetPassword(email, code);
+
+
+            return ResponseEntity.ok(AuthResponse.builder()
+                    .statusCode(200)
+                    .message("임시 비밀번호가 생성되었습니다.")
+                    .data(Map.of("tempPassword", tempPassword))
+                    .build());
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(HttpStatus.PRECONDITION_FAILED)
+                    .body(AuthResponse.builder()
+                            .statusCode(412)
+                            .message(e.getMessage())
+                            .build());
+        } catch (RuntimeException e) {
+            // 비밀번호 암호화 실패 등 기타 오류
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(AuthResponse.builder()
+                            .statusCode(500)
+                            .message(e.getMessage())
+                            .build());
+        }
     }
 
 }
