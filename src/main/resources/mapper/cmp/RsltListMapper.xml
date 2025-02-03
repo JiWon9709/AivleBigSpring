@@ -171,4 +171,30 @@
     WHERE jd.jutaek_dtl_sn = #{jutaekDtlSn}
   </select>
 
+  <!--이미지 서버 등록-->
+  <insert
+    id="regImg"
+    parameterType="kt.aivle.rslt_list.model.ImgEntity"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper.regImg*/
+    INSERT INTO img (
+      ref_table,
+      ref_sn,
+      path,
+      file_name,
+      ori_file_name,
+      ext,
+      use_yn,
+      created_dt
+    ) VALUES (
+     #{refTable}
+     , #{refSn}
+     , #{path}
+     , #{fileName}
+     , #{oriFileName}
+     , #{ext}
+     , 'Y'
+     , NOW()
+   );
+  </insert>
 </mapper>

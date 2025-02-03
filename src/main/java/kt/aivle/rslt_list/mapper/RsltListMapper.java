@@ -2,10 +2,7 @@ package kt.aivle.rslt_list.mapper;
 
 import kt.aivle.base.config.mapper.DATA_SOURCE;
 import kt.aivle.clnt_co.model.TestList;
-import kt.aivle.rslt_list.model.InputInfo;
-import kt.aivle.rslt_list.model.JutaekDtlInfo;
-import kt.aivle.rslt_list.model.JutaekInfo;
-import kt.aivle.rslt_list.model.JutaekListRequest;
+import kt.aivle.rslt_list.model.*;
 
 import java.util.List;
 
@@ -65,4 +62,12 @@ public interface RsltListMapper {
    * @return
    */
   public JutaekDtlInfo getJutaekDtl(Long jutaekDtlSn);
+
+  /**
+   * 이미지 서버 등록
+   *
+   * @param imgEntity
+   * @return
+   */
+  public int regImg(ImgEntity imgEntity);
 }
