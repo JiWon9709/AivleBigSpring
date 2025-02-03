@@ -5,10 +5,7 @@ import io.swagger.annotations.*;
 import kt.aivle.base.BaseMsg;
 import kt.aivle.base.BaseResListModel;
 import kt.aivle.base.BaseResModel;
-import kt.aivle.rslt_list.model.JutaekDtlInfo;
-import kt.aivle.rslt_list.model.JutaekDtlRequest;
-import kt.aivle.rslt_list.model.JutaekInfo;
-import kt.aivle.rslt_list.model.JutaekListRequest;
+import kt.aivle.rslt_list.model.*;
 import kt.aivle.rslt_list.service.RsltListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -49,6 +46,22 @@ public class RsltListController {
       JutaekDtlRequest jutaekDtlRequest = new JutaekDtlRequest();
       jutaekDtlRequest.setJutaekDtlSn(jutaekDtlSn);
       response = rsltListService.jutaekDtl(jutaekDtlRequest);
+    } catch (Exception e) {
+      response.setResultMsg(e.getMessage());
+      response.setResultCode(BaseMsg.FAILED.getCode());
+    }
+    return response;
+  }
+
+  @ApiOperation(value = "결과 리스트")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResListModel.class)})
+  @PostMapping(value = "/reg-img",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public BaseResModel regImg(@ApiParam(value = "결과 리스트", required = true) @RequestBody ImgRegRequest imgRegRequest) {
+    BaseResModel response = new BaseResModel<>();
+    try {
+      response = rsltListService.testImgReg(imgRegRequest);
     } catch (Exception e) {
       response.setResultMsg(e.getMessage());
       response.setResultCode(BaseMsg.FAILED.getCode());
