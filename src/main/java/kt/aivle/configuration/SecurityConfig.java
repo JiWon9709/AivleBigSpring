@@ -61,7 +61,8 @@ public class SecurityConfig {
                         "/users/verify-code",
                         "/gongo/active",
                         "/board",
-                        "/post-board"
+                        "/post-board",
+                        "/reg-img"
                 ).permitAll()
                 .antMatchers("/users/reissue").authenticated()  // JWT 검증 필요
                 .anyRequest().authenticated()
