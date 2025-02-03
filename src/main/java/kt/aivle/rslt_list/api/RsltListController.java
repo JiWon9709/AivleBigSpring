@@ -56,9 +56,9 @@ public class RsltListController {
   @ApiOperation(value = "결과 리스트")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResListModel.class)})
   @PostMapping(value = "/reg-img",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
+      consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE},
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public BaseResModel regImg(@ApiParam(value = "결과 리스트", required = true) @RequestBody ImgRegRequest imgRegRequest) {
+  public BaseResModel regImg(@ApiParam(value = "결과 리스트", required = true) ImgRegRequest imgRegRequest) {
     BaseResModel response = new BaseResModel<>();
     try {
       response = rsltListService.testImgReg(imgRegRequest);
