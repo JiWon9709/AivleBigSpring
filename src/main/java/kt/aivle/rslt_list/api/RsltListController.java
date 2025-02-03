@@ -24,10 +24,12 @@ public class RsltListController {
   private RsltListService rsltListService;
 
   @ApiOperation(value = "결과 리스트")
-  @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResModel.class)})
-  @PostMapping(value = "/rslt-list", produces = MediaType.APPLICATION_JSON_VALUE)
-  public BaseResListModel<JutaekInfo> rsltList(@ApiParam(value = "페이지 크기", required = true) @RequestBody JutaekListRequest jutaekListRequest) {
-    BaseResListModel<JutaekInfo> response = new BaseResListModel();
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResListModel.class)})
+  @PostMapping(value = "/rslt-list",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public BaseResListModel<JutaekInfo> rsltList(@ApiParam(value = "결과 리스트", required = true) @RequestBody JutaekListRequest jutaekListRequest) {
+    BaseResListModel<JutaekInfo> response = new BaseResListModel<>();
     try {
       response = rsltListService.rsltList(jutaekListRequest);
     } catch (Exception e) {
