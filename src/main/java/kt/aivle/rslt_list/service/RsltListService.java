@@ -4,10 +4,7 @@ import kt.aivle.base.BaseMsg;
 import kt.aivle.base.BaseResListModel;
 import kt.aivle.base.BaseResModel;
 import kt.aivle.rslt_list.mapper.RsltListMapper;
-import kt.aivle.rslt_list.model.JutaekDtlInfo;
-import kt.aivle.rslt_list.model.JutaekDtlRequest;
-import kt.aivle.rslt_list.model.JutaekInfo;
-import kt.aivle.rslt_list.model.JutaekListRequest;
+import kt.aivle.rslt_list.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,21 +35,26 @@ public class RsltListService {
     // 페이징 파라미터 전달
     result.setPageNum(jutaekListRequest.getPageNum());
     result.setPageSize(jutaekListRequest.getPageSize());
+
     // 페이지 계산
     if (jutaekListRequest.getPageNum() > 0) {
       jutaekListRequest.setPageOffset((jutaekListRequest.getPageNum() - 1) * jutaekListRequest.getPageSize());
     }
 
-    // 일단 지금 사용중인 공고 sn을 찾고
-
-    int activeGongo = rsltListMapper.getActiveGongoSn();
-    if (activeGongo == 0) {
+    //inputSn구해서 input 정보 불러오기
+    Long inputSn = rsltListMapper.getActiveInputSn(jutaekListRequest);
+    if (inputSn > 0) {
+      InputInfo inputInfo = rsltListMapper.getInputInfo(inputSn);
+      jutaekListRequest.setInputRank(inputInfo.getInputRank());
+      jutaekListRequest.setInputType(inputInfo.getInputType());
+      jutaekListRequest.setInputScore(inputInfo.getInputScore());
+    } else {
       result.setResultMsg(BaseMsg.FAILED.getValue());
       result.setResultCode(BaseMsg.FAILED.getCode());
     }
 
     // 공고 sn으로 해당하는 공고 dtl sn들을 받기
-    List<Integer> dtlSnList = rsltListMapper.getDtlSnByGongoSn(activeGongo);
+    List<Integer> dtlSnList = rsltListMapper.getDtlSnByGongoSn(jutaekListRequest.getGongoSn());
     if (dtlSnList.size() == 0) {
       result.setResultMsg(BaseMsg.FAILED.getValue());
       result.setResultCode(BaseMsg.FAILED.getCode());

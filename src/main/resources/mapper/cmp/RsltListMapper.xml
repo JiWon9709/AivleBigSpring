@@ -14,25 +14,54 @@
       AND CAST(jd.jutaek_type AS UNSIGNED) BETWEEN #{minSize} AND #{maxSize}
     </if>
     <if test="minGuarantee != null and minGuarantee != '' and maxGuarantee != null and maxGuarantee != ''">
-      AND jd.guarantee BETWEEN #{minGuarantee} AND #{maxGuarantee}
+      <choose>
+        <when test="inputRank == 1">
+          AND jd.a_guarantee BETWEEN #{minGuarantee} AND #{maxGuarantee}
+        </when>
+        <otherwise>
+          AND jd.b_guarantee BETWEEN #{minGuarantee} AND #{maxGuarantee}
+        </otherwise>
+      </choose>
     </if>
     <if test="minMonthly != null and minMonthly != '' and maxMonthly != null and maxMonthly != ''">
-      AND jd.monthly BETWEEN #{minMonthly} AND #{maxMonthly}
+      <choose>
+        <when test="inputRank == 1">
+          AND jd.a_monthly BETWEEN #{minMonthly} AND #{maxMonthly}
+        </when>
+        <otherwise>
+          AND jd.b_monthly BETWEEN #{minMonthly} AND #{maxMonthly}
+        </otherwise>
+      </choose>
     </if>
   </sql>
 
-  <!-- 현재 활성화되어있는 공고 sn 찾기 -->
+  <!-- 방금 입력한 input sn 찾기 -->
   <select
-    id="getActiveGongoSn"
+    id="getActiveInputSn"
     resultType="Integer"
   >
-    /* kt.aivle.rslt_list.RsltListMapper.getActiveGongoSn*/
+    /* kt.aivle.rslt_list.RsltListMapper.getActiveInputSn*/
     SELECT COALESCE(
-      (SELECT g.gongo_sn
-      FROM gongo AS g
-      WHERE g.use_yn = 'Y'),
+      (SELECT MAX(i.input_sn)
+      FROM input AS i
+      WHERE i.user_sn = #{userSn}
+      AND i.gongo_sn = #{gongoSn}),
       0
     ) AS result;
+  </select>
+
+  <!-- input sn으로 input 정보 받아오기 -->
+  <select
+    id="getInputInfo"
+    resultType="kt.aivle.rslt_list.model.InputInfo"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper.getInputInfo*/
+    SELECT
+    input_type
+    , input_rank
+    , input_score
+    FROM input AS i
+    WHERE i.input_sn = #{inputSn}
   </select>
 
   <!-- 공고 sn으로 해당하는 공고 dtlsn 찾기 -->
