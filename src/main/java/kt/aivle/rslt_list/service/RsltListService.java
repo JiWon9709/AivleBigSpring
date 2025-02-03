@@ -3,6 +3,7 @@ package kt.aivle.rslt_list.service;
 import kt.aivle.base.BaseMsg;
 import kt.aivle.base.BaseResListModel;
 import kt.aivle.base.BaseResModel;
+import kt.aivle.base.exception.BaseErrorCode;
 import kt.aivle.rslt_list.mapper.RsltListMapper;
 import kt.aivle.rslt_list.model.*;
 import org.apache.logging.log4j.LogManager;
@@ -12,7 +13,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class RsltListService {
@@ -102,4 +108,53 @@ public class RsltListService {
     }
     return result;
   }
+
+  /**
+   * 주택 상세정보
+   *
+   * @return
+   */
+  @Transactional
+  public BaseResModel<JutaekDtlInfo> testImgReg(ImgRegRequest imgRegRequest) throws IOException {
+    BaseResModel<JutaekDtlInfo> result = new BaseResModel();
+    for (int i = 0; i < imgRegRequest.getImgList().size(); i++) {
+      BufferedImage image = ImageIO.read(imgRegRequest.getImgList().get(i).getInputStream());
+      String uploadFolder = dir + "img";
+      String uploadImgNm = UUID.randomUUID().toString();
+      String imgNm = imgRegRequest.getImgList().get(i).getOriginalFilename();
+      String imgExt = imgNm.substring(imgNm.lastIndexOf(".") + 1);
+      // int xSize = image.getWidth();
+      // int ySize = image.getHeight();
+      uploadImgNm = uploadImgNm.substring(uploadImgNm.lastIndexOf("\\") + 1);
+      ImgEntity imgEntity = new ImgEntity();
+      imgEntity.setRefSn(imgRegRequest.getRefSn());
+      imgEntity.setRefTable(imgRegRequest.getRefTable());
+      imgEntity.setPath("/img");
+      imgEntity.setFileName(uploadImgNm + "." + imgExt);
+      imgEntity.setExt(imgExt);
+      imgEntity.setOriFileName(imgNm);
+
+      int cnt = rsltListMapper.regImg(imgEntity);
+      if (cnt > 0) {
+        result.setResultCode(BaseErrorCode.SUCCESS.getCode());
+        result.setResultMsg("이미지 정보를 DB에 저장했습니다.");
+      } else {
+        result.setResultCode(BaseErrorCode.ERROR_ETC.getCode());
+        result.setResultMsg("이미지 정보를 DB에 저장하지 못했습니다.");
+        return result;
+      }
+      File saveFile = new File(uploadFolder, uploadImgNm + "." + imgExt);
+      try {
+        imgRegRequest.getImgList().get(i).transferTo(saveFile);
+      } catch (Exception e) {
+        result.setResultCode(BaseErrorCode.ERROR_ETC.getCode());
+        result.setResultMsg("이미지를 서버에 저장 중 에러가 발생하였습니다.");
+        return result;
+      }
+    }
+
+    return result;
+  }
+
+
 }
