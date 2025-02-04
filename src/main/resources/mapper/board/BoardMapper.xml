@@ -20,7 +20,27 @@
         b.created_dt DESC
     </select>
 
-    <insert id="saveboard" parameterType="kt.aivle.board.model.BoardRequest" useGeneratedKeys="true" keyProperty="boardSn">
+    <select id="getListGongo" resultType="kt.aivle.board.model.Gongo">
+        SELECT
+            gongo_sn,
+            gongo_name,
+            gongo_type,
+            schedule_start_dt,
+            schedule_end_dt,
+            document_start_dt,
+            document_end_dt,
+            use_yn,
+            created_dt,
+            updated_dt
+        FROM
+            gongo
+        WHERE
+            use_yn = 'Y'
+        ORDER BY
+            gongo_sn DESC
+    </select>
+
+    <insert id="saveboard" parameterType="kt.aivle.board.model.Board" useGeneratedKeys="true" keyProperty="boardSn">
         INSERT INTO board (
         user_sn,
         title,
