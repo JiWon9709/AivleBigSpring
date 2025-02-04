@@ -1,9 +1,7 @@
 package kt.aivle.board.service;
 
 import kt.aivle.board.mapper.BoardMapper;
-import kt.aivle.board.model.Board;
-import kt.aivle.board.model.BoardListResponse;
-import kt.aivle.board.model.BoardRequest;
+import kt.aivle.board.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +26,18 @@ public class BoardService {
             throw new RuntimeException(e);
         }
         return boardlist;
+    }
+
+    public GongoListResponse getListGongo() {
+        GongoListResponse gongolist = new GongoListResponse();
+        try {
+            // mapper에서 리스트형식으로 받기위해 set
+            List<Gongo> gongoList = boardMapper.getListGongo();
+            gongolist.setGongoListResponse(gongoList);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return gongolist;
     }
 
     public void savePost(Board board) {

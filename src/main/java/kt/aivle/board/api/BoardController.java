@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponse;
 import kt.aivle.board.model.Board;
 import kt.aivle.board.model.BoardListResponse;
 import kt.aivle.board.model.BoardRequest;
+import kt.aivle.board.model.GongoListResponse;
 import kt.aivle.board.service.BoardService;
 import kt.aivle.file.service.ImgService;
 import kt.aivle.member.service.JwtTokenProvider;
@@ -46,6 +47,18 @@ public class BoardController {
             throw new RuntimeException(e);
         }
         return boardlist;
+    }
+
+    @ApiOperation(value="공고 리스트")
+    @GetMapping("/gongoboard")
+    public GongoListResponse getListGongo(){
+        GongoListResponse gongolist = new GongoListResponse();
+        try {
+            gongolist = boardService.getListGongo();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return gongolist;
     }
 
     @PostMapping("/post-board")
