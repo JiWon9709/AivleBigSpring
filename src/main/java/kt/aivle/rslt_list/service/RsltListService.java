@@ -120,7 +120,7 @@ public class RsltListService {
     BaseResModel<JutaekDtlInfo> result = new BaseResModel();
     for (int i = 0; i < imgRegRequest.getImgList().size(); i++) {
       BufferedImage image = ImageIO.read(imgRegRequest.getImgList().get(i).getInputStream());
-      String uploadFolder = "http" + ":" + "/"+"/" + "4.217.186.166:8081/uploads/img/";
+      String uploadFolder = dir + "img";
       String uploadImgNm = UUID.randomUUID().toString();
       String imgNm = imgRegRequest.getImgList().get(i).getOriginalFilename();
       String imgExt = imgNm.substring(imgNm.lastIndexOf(".") + 1);
@@ -130,7 +130,7 @@ public class RsltListService {
       ImgEntity imgEntity = new ImgEntity();
       imgEntity.setRefSn(imgRegRequest.getRefSn());
       imgEntity.setRefTable(imgRegRequest.getRefTable());
-      imgEntity.setPath("http" + ":" + "/"+"/" + "4.217.186.166:8081/uploads/img/");
+      imgEntity.setPath("/img");
       imgEntity.setFileName(uploadImgNm + "." + imgExt);
       imgEntity.setExt(imgExt);
       imgEntity.setOriFileName(imgNm);
