@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kt.aivle.file.mapper.FileMapper">
+
+    <!-- 이미지 정보 삽입 -->
+    <insert id="saveImage" parameterType="kt.aivle.file.model.Img">
+        INSERT INTO img (
+        ref_table,
+        ref_sn,
+        path,
+        ext,
+        use_yn,
+        created_dt,
+        updated_dt
+        ) VALUES (
+        #{refTable},
+        #{refSn},
+        #{path},
+        #{ext},
+        'Y',
+        NOW(),
+        NOW()
+        )
+    </insert>
+
+    <!-- 이미지 정보 조회 -->
+    <select id="getImagesByRefSn" parameterType="int" resultType="kt.aivle.file.model.Img">
+        SELECT img_sn, ref_table, ref_sn, path, ext, use_yn, created_dt, updated_dt
+        FROM img
+        WHERE ref_sn = #{refSn} AND use_yn = 'Y'
+    </select>
+
+    <!-- 이미지 정보 삭제 (use_yn 값을 N으로 설정) -->
+    <update id="deleteImageBySn" parameterType="int">
+        UPDATE img
+        SET use_yn = 'N',
+        updated_dt = NOW()
+        WHERE img_sn = #{imgSn}
+    </update>
+
+</mapper>
