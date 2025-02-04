@@ -81,6 +81,7 @@ public class RsltListService {
       } else {
         List<JutaekInfo> infoList = rsltListMapper.getJutaekList(jutaekListRequest);
         result.setData(infoList);
+        result.setTotalCount(jutaekListCnt);
       }
     }
     return result;
