@@ -130,7 +130,7 @@ public class RsltListService {
       ImgEntity imgEntity = new ImgEntity();
       imgEntity.setRefSn(imgRegRequest.getRefSn());
       imgEntity.setRefTable(imgRegRequest.getRefTable());
-      imgEntity.setPath("/img");
+      imgEntity.setPath("http://4.217.186.166:8081/uploads/img/");
       imgEntity.setFileName(uploadImgNm + "." + imgExt);
       imgEntity.setExt(imgExt);
       imgEntity.setOriFileName(imgNm);
