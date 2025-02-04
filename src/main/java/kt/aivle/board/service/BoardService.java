@@ -8,8 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
+@Transactional
 public class BoardService {
     @Autowired
     private BoardMapper boardMapper;
@@ -27,10 +31,11 @@ public class BoardService {
     }
 
     public void savePost(Board board) {
-        Board post = new Board();
-        post.setTitle(board.getTitle());
-        post.setContent(board.getContent());
-        post.setUserSn(board.getUserSn());
-        boardMapper.saveboard(post);
+//        Board post = new Board();
+//        post.setTitle(board.getTitle());
+//        post.setContent(board.getContent());
+//        post.setUserSn(board.getUserSn());
+        log.info("게시글 저장 요청: {}", board);
+        boardMapper.saveboard(board);
     }
 }

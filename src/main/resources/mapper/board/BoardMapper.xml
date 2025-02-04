@@ -20,7 +20,7 @@
         b.created_dt DESC
     </select>
 
-    <insert id="saveboard" parameterType="kt.aivle.board.model.BoardRequest" useGeneratedKeys="true" keyProperty="boardSn">
+    <insert id="saveboard" parameterType="kt.aivle.board.model.Board" useGeneratedKeys="true" keyProperty="boardSn">
         INSERT INTO board (
         user_sn,
         title,
