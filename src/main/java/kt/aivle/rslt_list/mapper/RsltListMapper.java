@@ -2,9 +2,7 @@ package kt.aivle.rslt_list.mapper;
 
 import kt.aivle.base.config.mapper.DATA_SOURCE;
 import kt.aivle.clnt_co.model.TestList;
-import kt.aivle.rslt_list.model.JutaekDtlInfo;
-import kt.aivle.rslt_list.model.JutaekInfo;
-import kt.aivle.rslt_list.model.JutaekListRequest;
+import kt.aivle.rslt_list.model.*;
 
 import java.util.List;
 
@@ -12,11 +10,18 @@ import java.util.List;
 public interface RsltListMapper {
 
   /**
-   * 현재 활성화되어있는 공고 sn 찾기
+   * 방금 입력한 input sn 찾기
    *
    * @return
    */
-  public int getActiveGongoSn();
+  public Long getActiveInputSn(JutaekListRequest jutaekListRequest);
+
+  /**
+   * input sn으로 input 정보 받아오기
+   *
+   * @return
+   */
+  public InputInfo getInputInfo(Long inputSn);
 
   /**
    * 공고 sn으로 해당하는 공고 dtlsn 찾기
@@ -24,7 +29,7 @@ public interface RsltListMapper {
    * @param sn
    * @return
    */
-  public List<Integer> getDtlSnByGongoSn(int sn);
+  public List<Integer> getDtlSnByGongoSn(Long sn);
 
   /**
    * 공고 dtlsn으로 해당하는 주택 sn 찾기
@@ -57,4 +62,12 @@ public interface RsltListMapper {
    * @return
    */
   public JutaekDtlInfo getJutaekDtl(Long jutaekDtlSn);
+
+  /**
+   * 이미지 서버 등록
+   *
+   * @param imgEntity
+   * @return
+   */
+  public int regImg(ImgEntity imgEntity);
 }

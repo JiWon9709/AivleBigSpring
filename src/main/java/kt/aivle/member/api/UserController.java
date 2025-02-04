@@ -167,14 +167,14 @@ public class UserController {
         // Access Token 쿠키 삭제
         Cookie accesTokenCookie = new Cookie("access_token", null);
         accesTokenCookie.setHttpOnly(true);
-        accesTokenCookie.setSecure(true);
+        accesTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
         accesTokenCookie.setMaxAge(0);
         accesTokenCookie.setPath("/");
 
         // Refresh Token 쿠키 삭제
         Cookie refreshTokenCookie = new Cookie("refresh_token", null);
         refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
         refreshTokenCookie.setMaxAge(0);
         refreshTokenCookie.setPath("/");
 
@@ -204,7 +204,7 @@ public class UserController {
         try {
             String email = request.getEmail();
             String code = userService.sendVerificationCode(email);
-            log.info("인증코드 생성 완료: {}", code);
+            log.info("인증코드 생성 완료: 이메일: {}", email);
 
             userService.sendEmail(email, code);
             log.info("이메일 발송 완료");
@@ -217,13 +217,37 @@ public class UserController {
     }
 
     // 인증코드 확인 및 비밀번호 재설정
-    @ApiOperation(value = "인증코드 확인 및 비밀번호 재설정")
+    @ApiOperation(value = "인증코드 확인 및 임시 비밀번호 발급")
     @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String code = request.get("code");
-        String tempPassword = userService.verifyCodeAndResetPassword(email, code);
-        return ResponseEntity.ok().body(Map.of("message", "임시 비밀번호가 생성되었습니다.", "tempPassword", tempPassword));
+        try {
+            String tempPassword = userService.verifyCodeAndResetPassword(email, code);
+
+
+            return ResponseEntity.ok(AuthResponse.builder()
+                    .statusCode(200)
+                    .message("임시 비밀번호가 생성되었습니다.")
+                    .data(Map.of("tempPassword", tempPassword))
+                    .build());
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(HttpStatus.PRECONDITION_FAILED)
+                    .body(AuthResponse.builder()
+                            .statusCode(412)
+                            .message(e.getMessage())
+                            .build());
+        } catch (RuntimeException e) {
+            // 비밀번호 암호화 실패 등 기타 오류
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(AuthResponse.builder()
+                            .statusCode(500)
+                            .message(e.getMessage())
+                            .build());
+        }
     }
 
 }

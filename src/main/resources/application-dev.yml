@@ -19,6 +19,14 @@ spring:
           starttls:
             enable: true
 
+# 로그 추적 위해 임시 설정
+logging:
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    kt.aivle: DEBUG
+
 jwt:
   secret: ${JWT_SECRET}
 

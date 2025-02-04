@@ -60,4 +60,33 @@ public class JutaekListRequest extends BaseListModel {
   @ApiModelProperty(required = true, notes = "최대크기", position = 8)
   private String maxSize;
 
+  /**
+   * 공고고유번호
+   */
+  @ApiModelProperty(required = true, notes = "공고고유번호", position = 9)
+  private Long gongoSn;
+
+  /**
+   * 유저고유번호
+   */
+  @ApiModelProperty(required = true, notes = "유저고유번호", position = 10)
+  private Long userSn;
+
+  /**
+   * 청약유형
+   */
+  @ApiModelProperty(required = true, notes = "청약유형", position = 11)
+  private String inputType;
+
+  /**
+   * 청약순위
+   */
+  @ApiModelProperty(required = true, notes = "청약순위", position = 12)
+  private Long inputRank;
+
+  /**
+   * 청약점수
+   */
+  @ApiModelProperty(required = true, notes = "청약점수", position = 13)
+  private Long inputScore;
 }

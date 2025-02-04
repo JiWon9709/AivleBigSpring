@@ -7,12 +7,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -63,7 +65,7 @@ public class UserService {
             }
 
             // 비밀번호 검증
-            String encryptedPassword = Sha256Util.encrypt(loginRequest.getPassword());
+            String encryptedPassword = Sha256Util.encrypt(loginRequest.getPassword().trim());
             log.info("입력된 비밀번호 암호화 결과: {}", encryptedPassword);
             log.info("저장된 비밀번호: {}", userAuth.getPassword());
 
@@ -105,7 +107,7 @@ public class UserService {
 
         String code = generateRandomCode();
         verificationCodes.put(email, new VerificationInfo(code, LocalDateTime.now()));
-        log.info("생성된 인증코드: {}", code);
+
 
         return code;
     }
@@ -114,16 +116,54 @@ public class UserService {
     public void sendEmail(String email, String code) {
         log.info("이메일 발송 시작 - 수신자: {}", email);
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("비밀번호 재설정 인증번호");
-        message.setText("인증번호: " + code);
-        message.setFrom("your-email@gmail.com"); // 발신자 이메일 추가
-
         try {
-            mailSender.send(message);
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setSubject("Zipline - 비밀번호 재설정 인증번호");
+            helper.setFrom("your-email@gmail.com");
+
+            String htmlContent = String.format("""
+            <div style="margin:100px;">
+                <div style="margin-bottom: 50px;">
+                    <h1 style="font-size: 24px; color: #303030;">Zipline</h1>
+                </div>
+                
+                <div style="margin-bottom: 30px;">
+                    <h2 style="font-size: 20px; color: #404040;">비밀번호 재설정 인증번호 안내</h2>
+                </div>
+                
+                <div style="background-color: #f7f7f7; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+                    <p style="font-size: 16px; color: #606060; margin-bottom: 20px;">
+                        안녕하세요.<br>
+                        Zipline 서비스 비밀번호 재설정을 위한 인증번호를 안내해 드립니다.
+                    </p>
+                    
+                    <div style="background-color: #ffffff; padding: 20px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+                        <span style="font-size: 30px; color: #000000; font-weight: bold; letter-spacing: 5px;">%s</span>
+                    </div>
+                    
+                    <p style="font-size: 14px; color: #808080;">
+                        * 본 인증번호는 5분간 유효합니다.<br>
+                        * 비밀번호 재설정을 요청하지 않으셨다면 이 메일을 무시하셔도 됩니다.
+                    </p>
+                </div>
+                
+                <div style="border-top: 1px solid #e9e9e9; padding-top: 20px;">
+                    <p style="font-size: 12px; color: #b0b0b0;">
+                        본 메일은 발신전용 메일이므로 회신을 받지 않습니다.<br>
+                        Copyright © Zipline All rights reserved.
+                    </p>
+                </div>
+            </div>
+        """, code);
+
+            helper.setText(htmlContent, true);
+            mailSender.send(mimeMessage);
             log.info("이메일 발송 성공 - 수신자: {}", email);
-        } catch (MailException e) {
+
+        } catch (MessagingException | MailException e) {
             log.error("이메일 발송 실패 - 상세 에러: {}", e.getMessage());
             throw new RuntimeException("이메일 발송에 실패했습니다.", e);
         }
@@ -136,7 +176,7 @@ public class UserService {
 
         VerificationInfo info = verificationCodes.get(email);
         if (info == null || !info.getVerificationCode().equals(code)) {
-            log.warn("인증번호 불일치 - 이메일: {}, 입력된 코드: {}", email, code);
+
             throw new IllegalArgumentException("잘못된 인증번호입니다.");
         }
 
@@ -149,7 +189,6 @@ public class UserService {
 
         // 임시 비밀번호 생성 및 저장
         String tempPassword = generateTempPassword();
-        log.info("임시 비밀번호 생성 완료 - 이메일: {}", email);
 
         try {
             String encryptedPassword = Sha256Util.encrypt(tempPassword);
