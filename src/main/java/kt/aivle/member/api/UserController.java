@@ -50,11 +50,24 @@ public class UserController {
             @RequestBody LoginRequest loginRequest,
             HttpServletResponse response) {
         try {
+            long startTime = System.currentTimeMillis();
+
+            // 1.유저 서비스 로그인 시간 체크
+            log.info("로그인 프로세스 시작");
             UserResponse userResponse = userService.login(loginRequest);
+            log.info("유저 서비스 로그인 소요시간: {}ms", System.currentTimeMillis() - startTime);
+
+
+            // 2. 토큰 생성 시간 체크
+            long tokenStartTime = System.currentTimeMillis();
             TokenDto tokenDto = jwtTokenProvider.createToken(
                     String.valueOf((userResponse.getUserSn())),
                     Collections.singletonList("ROLE_USER")
             );
+            log.info("토큰 생성 소요시간: {}ms", System.currentTimeMillis() - tokenStartTime);
+
+            // 3. 쿠키 설정 시작 시간 체크
+            long cookieStartTime = System.currentTimeMillis();
 
             //Access Token을 HttpOnly 쿠키에 설정
             Cookie accessTokenCookie = new Cookie("access_token", tokenDto.getAccessToken());
@@ -77,15 +90,22 @@ public class UserController {
             response.addCookie(accessTokenCookie);
             response.addCookie(refreshTokenCookie);
 
+            log.info("쿠키 설정 소요시간: {}ms", System.currentTimeMillis() - cookieStartTime);
+
+            // 4. 전체 프로세스 완료시간 체크
+            log.info("전체 로그인 프로세스 완료 시간: {}ms", System.currentTimeMillis() - startTime);
+
             return ResponseEntity.ok(new LoginResponse(
                     200,
                     "로그인이 완료되었습니다.",
                     userResponse
             ));
         } catch (IllegalArgumentException e) {
+            log.error("로그인 실패 - 잘못된 요청: {}", e.getMessage());
             return ResponseEntity.badRequest()
                     .body(new LoginResponse(400, e.getMessage(), null));
         } catch (Exception e) {
+            log.error("로그인 실패 - 서버 에러: {}", e.getMessage());
             return ResponseEntity.internalServerError()
                     .body(new LoginResponse(500, "서버 오류가 발생했습니다.", null));
         }
