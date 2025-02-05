@@ -80,11 +80,22 @@ public class RsltListService {
         result.setResultCode(BaseMsg.FAILED.getCode());
       } else {
         List<JutaekInfo> infoList = rsltListMapper.getJutaekList(jutaekListRequest);
-        //사진정보 넣기
         for (int i = 0; i < infoList.size(); i++) {
+          //사진정보 넣기
           List<String> jutaekImgInfo = rsltListMapper.getJutaekImg(infoList.get(i).getJutaekDtlSn());
           if (jutaekImgInfo != null && jutaekImgInfo.size() > 0) {
             infoList.get(i).setJutaekImg(jutaekImgInfo);
+          }
+          //즐겨찾기 정보 넣기
+          FavExChkRequest favExChkRequest = new FavExChkRequest();
+          favExChkRequest.setGongoSn(jutaekListRequest.getGongoSn());
+          favExChkRequest.setUserSn(jutaekListRequest.getUserSn());
+          favExChkRequest.setJutaekDtlSn(infoList.get(i).getJutaekDtlSn());
+          Long favoriteSn = rsltListMapper.getFavExChk(favExChkRequest);
+          if (favoriteSn > 0) {
+            infoList.get(i).setFavYn("Y");
+          } else {
+            infoList.get(i).setFavYn("N");
           }
         }
         result.setData(infoList);
