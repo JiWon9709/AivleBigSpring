@@ -210,4 +210,52 @@
      , NOW()
    );
   </insert>
+
+  <!--db에 즐겨찾기정보 유무 확인 -->
+  <select
+    id="getFavExChk"
+    resultType="Long"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper.getFavExChk*/
+
+    SELECT COALESCE(
+    (SELECT favorite_sn
+      FROM favorite
+      WHERE user_sn = #{userSn}
+      AND gongo_sn = #{gongoSn}
+      AND jutaek_dtl_sn = #{jutaekDtlSn}),
+    0
+    ) AS result;
+  </select>
+
+  <!--즐겨찾기 등록-->
+  <insert
+    id="regFav"
+    parameterType="kt.aivle.rslt_list.model.FavExChkRequest"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper.regFav*/
+    INSERT INTO favorite (
+      jutaek_dtl_sn,
+      user_sn,
+      gongo_sn,
+      use_yn
+    ) VALUES (
+       #{jutaekDtlSn}
+     , #{userSn}
+     , #{gongoSn}
+     , 'Y'
+     );
+  </insert>
+
+  <!--즐겨찾기 여부 변경 -->
+  <update
+    id="updFavYn"
+    parameterType="Long"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper,updFavYn */
+    UPDATE favorite
+    SET
+    use_yn = 'Y'
+    WHERE favorite_sn = #{favoriteSn}
+  </update>
 </mapper>
