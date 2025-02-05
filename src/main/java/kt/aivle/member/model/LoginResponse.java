@@ -9,5 +9,4 @@ public class LoginResponse {
     private int resultCode;
     private String resultMsg;
     private UserResponse user;
-    //private TokenDto token;
 }

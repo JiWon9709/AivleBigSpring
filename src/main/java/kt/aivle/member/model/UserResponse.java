@@ -7,6 +7,7 @@ public class UserResponse {
     private Integer userSn;
     private String password;
     private String userName;
+    private String role; // 권한 추가
     private String email;
     private String gender;
     private String zipCode;
