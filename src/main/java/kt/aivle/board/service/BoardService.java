@@ -2,12 +2,25 @@ package kt.aivle.board.service;
 
 import kt.aivle.board.mapper.BoardMapper;
 import kt.aivle.board.model.*;
+import kt.aivle.board.model.ImgEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
 
 @Slf4j
 @Service
@@ -15,6 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class BoardService {
     @Autowired
     private BoardMapper boardMapper;
+    private static final String FTP_UPLOAD_DIR = "/uploads/board/";
+    private static final String FTP_URL_PREFIX = "http://4.217.186.166:8081/uploads/img/";
+
+    @Value("${file.path}")
+    private String dir;
 
     public BoardListResponse getListBoard() {
         BoardListResponse boardlist = new BoardListResponse();
@@ -48,4 +66,56 @@ public class BoardService {
         log.info("게시글 저장 요청: {}", board);
         boardMapper.saveboard(board);
     }
+
+    @Transactional
+    public void uploadAndSaveImage(String refTable, int refSn, MultipartFile file) throws IOException {
+//        BufferedImage image = ImageIO.read(file.get(i).getInputStream());
+        // 파일 이름 및 확장자 생성
+        String uploadFolder = dir + "img";
+        String originalFilename = file.getOriginalFilename();
+        String ext = originalFilename.substring(originalFilename.lastIndexOf('.') + 1);
+        String uniqueFileName = UUID.randomUUID().toString() + "." + ext;
+
+        // FTP 업로드
+//        uploadFileToFtp(file, uniqueFileName);
+        // 디렉터리 생성 체크
+        File directory = new File(uploadFolder);
+        if (!directory.exists()) {
+            directory.mkdirs(); // 디렉터리 없으면 생성
+        }
+        // DB 저장
+        ImgEntity imgEntity = new ImgEntity();
+        imgEntity.setRefTable(refTable);
+        imgEntity.setRefSn(refSn);
+        imgEntity.setPath(FTP_URL_PREFIX);
+        imgEntity.setFileName(uniqueFileName);
+        imgEntity.setOriFileName(originalFilename);
+        imgEntity.setExt(ext);
+
+        boardMapper.regImg(imgEntity);
+        // FTP 업로드
+        try {
+            File saveFile = new File(uploadFolder, uniqueFileName);
+            file.transferTo(saveFile);
+        } catch (Exception e) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지를 서버에 저장 중 에러가 발생하였습니다.");
+        }
+
+    }
+
+//    private void uploadFileToFtp(MultipartFile file, String fileName) throws IOException {
+//        Client ftpClient = new Client();
+//
+//        ftpClient.connect("4.217.186.166", 21);
+//        ftpClient.login("aivler", "aivle202406");
+//
+//        ftpClient.setFileType(Client.BINARY_FILE_TYPE);
+//
+//        try (InputStream inputStream = file.getInputStream()) {
+//            ftpClient.storeFile(FTP_UPLOAD_DIR + fileName, inputStream);
+//        } finally {
+//            ftpClient.logout();
+//            ftpClient.disconnect();
+//        }
+//    }
 }
