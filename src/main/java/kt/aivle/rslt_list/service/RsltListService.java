@@ -118,6 +118,36 @@ public class RsltListService {
   }
 
   /**
+   * 즐겨찾기
+   *
+   * @return
+   */
+  @Transactional
+  public BaseResModel favoriteCtl(FavExChkRequest favExChkRequest) {
+    BaseResModel result = new BaseResModel();
+    try {
+      Long favoriteSn = rsltListMapper.getFavExChk(favExChkRequest);
+      if (favoriteSn != null && favoriteSn > 0) {
+        int cnt = rsltListMapper.updFavYn(favExChkRequest.getJutaekDtlSn());
+        if (cnt == 0) {
+          result.setResultMsg("즐겨찾기 변경에 실패했습니다.");
+          result.setResultCode(BaseMsg.FAILED.getCode());
+        }
+      } else {
+        int cnt = rsltListMapper.regFav(favExChkRequest);
+        if (cnt == 0) {
+          result.setResultMsg("즐겨찾기 등록에 실패했습니다.");
+          result.setResultCode(BaseMsg.FAILED.getCode());
+        }
+      }
+    } catch (Exception e) {
+      result.setResultMsg("즐겨찾기 중 에러가 발생했습니다." + e);
+      result.setResultCode(BaseMsg.FAILED.getCode());
+    }
+    return result;
+  }
+
+  /**
    * 주택 상세정보
    *
    * @return
@@ -160,7 +190,6 @@ public class RsltListService {
         return result;
       }
     }
-
     return result;
   }
 

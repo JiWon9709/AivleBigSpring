@@ -53,12 +53,28 @@ public class RsltListController {
     return response;
   }
 
-  @ApiOperation(value = "결과 리스트")
+  @ApiOperation(value = "즐겨찾기 등록, 해제")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResListModel.class)})
+  @PostMapping(value = "/rslt-list",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public BaseResModel favoriteCtl(@ApiParam(value = "즐겨찾기 등록, 해제", required = true) @RequestBody FavExChkRequest favExChkRequest) {
+    BaseResModel response = new BaseResModel<>();
+    try {
+      response = rsltListService.favoriteCtl(favExChkRequest);
+    } catch (Exception e) {
+      response.setResultMsg(e.getMessage());
+      response.setResultCode(BaseMsg.FAILED.getCode());
+    }
+    return response;
+  }
+
+  @ApiOperation(value = "사진 등록")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResListModel.class)})
   @PostMapping(value = "/reg-img",
       consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE},
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public BaseResModel regImg(@ApiParam(value = "결과 리스트", required = true) ImgRegRequest imgRegRequest) {
+  public BaseResModel regImg(@ApiParam(value = "사진 등록", required = true) ImgRegRequest imgRegRequest) {
     BaseResModel response = new BaseResModel<>();
     try {
       response = rsltListService.testImgReg(imgRegRequest);
