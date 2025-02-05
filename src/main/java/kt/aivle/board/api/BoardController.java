@@ -14,6 +14,7 @@ import kt.aivle.member.service.RefreshTokenService;
 import kt.aivle.member.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 @Api(tags = "board", description = "게시판 api")
 @RestController
@@ -65,8 +67,11 @@ public class BoardController {
     public ResponseEntity<String> createPost(@RequestParam("title") String title,
                                              @RequestParam("content") String content,
                                              @RequestParam("userSn") int userSn,
-                                             @RequestParam(value = "fileUrl", required = false) MultipartFile file) {
+                                             @RequestParam(value = "files", required = false) List<MultipartFile> files) {
         Board b = new Board();
+        b.setUserSn(userSn);
+        b.setTitle(title);
+        b.setContent(content);
         try {
 //            String uploadDir = "uploads/";
 //            String fileName = file.getOriginalFilename();
@@ -82,17 +87,21 @@ public class BoardController {
 //            Path filePath = Paths.get(uploadDir + fileName);
 //            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 //
-//            // 파일 저장 로직
-//            if (file != null && !file.isEmpty()) {
-//                imgService.saveImage('board', refSn, filePath.toString(), ext);
-//                System.out.println("Uploaded File Path: " + filePath);
-//            }
-            b.setUserSn(userSn);
-            b.setTitle(title);
-            b.setContent(content);
+//
+            // 게시글 저장
             boardService.savePost(b);
+            // 이미지 저장 처리
+            if (files != null && !files.isEmpty()) {
+                for (MultipartFile file : files) {
+                    if (!file.isEmpty()) {
+                        boardService.uploadAndSaveImage("board", b.getBoardSn(), file);
+                    }
+                }
+            }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+//            throw new RuntimeException(e);
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 등록 중 오류가 발생했습니다.");
         }
         return ResponseEntity.ok("게시글이 등록되었습니다.");
     }
