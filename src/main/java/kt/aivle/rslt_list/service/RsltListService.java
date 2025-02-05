@@ -149,7 +149,7 @@ public class RsltListService {
         imgRegRequest.getImgList().get(i).transferTo(saveFile);
       } catch (Exception e) {
         result.setResultCode(BaseErrorCode.ERROR_ETC.getCode());
-        result.setResultMsg("이미지를 서버에 저장 중 에러가 발생하였습니다.");
+        result.setResultMsg("이미지를 서버에 저장 중 에러가 발생하였습니다." + e);
         return result;
       }
     }
