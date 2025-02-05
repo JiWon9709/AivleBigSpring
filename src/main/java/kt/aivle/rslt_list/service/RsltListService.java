@@ -139,7 +139,7 @@ public class RsltListService {
     try {
       Long favoriteSn = rsltListMapper.getFavExChk(favExChkRequest);
       if (favoriteSn != null && favoriteSn > 0) {
-        int cnt = rsltListMapper.updFavYn(favExChkRequest.getJutaekDtlSn());
+        int cnt = rsltListMapper.updFavYn(favoriteSn);
         if (cnt == 0) {
           result.setResultMsg("즐겨찾기 변경에 실패했습니다.");
           result.setResultCode(BaseMsg.FAILED.getCode());
