@@ -254,8 +254,10 @@
   >
     /* kt.aivle.rslt_list.RsltListMapper,updFavYn */
     UPDATE favorite
-    SET
-    use_yn = 'Y'
+    SET use_yn = CASE
+    WHEN use_yn = 'Y' THEN 'N'
+    ELSE 'Y'
+    END
     WHERE favorite_sn = #{favoriteSn}
   </update>
 </mapper>
