@@ -85,4 +85,19 @@
         , NOW()
         );
     </insert>
+
+    <select id="findImagesByBoardSn" resultType="kt.aivle.board.model.ImgEntity">
+        SELECT *
+        FROM img
+        WHERE ref_table = 'board' AND ref_sn = #{boardSn}
+    </select>
+    
+    <select id="getPostByBoardSn" resultType="kt.aivle.board.model.Board">
+        SELECT * FROM board WHERE board_sn = #{boardSn}
+    </select>
+    
+    <delete id="deletePost">
+        DELETE FROM board WHERE board_sn = #{boardSn}
+    </delete>
+
 </mapper>

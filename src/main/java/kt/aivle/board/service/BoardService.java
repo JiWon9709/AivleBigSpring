@@ -46,6 +46,10 @@ public class BoardService {
         return boardlist;
     }
 
+    public List<ImgEntity> getImagesByBoardSn(int boardSn) {
+        return boardMapper.findImagesByBoardSn(boardSn);
+    }
+
     public GongoListResponse getListGongo() {
         GongoListResponse gongolist = new GongoListResponse();
         try {
@@ -59,10 +63,6 @@ public class BoardService {
     }
 
     public void savePost(Board board) {
-//        Board post = new Board();
-//        post.setTitle(board.getTitle());
-//        post.setContent(board.getContent());
-//        post.setUserSn(board.getUserSn());
         log.info("게시글 저장 요청: {}", board);
         boardMapper.saveboard(board);
     }
@@ -76,8 +76,6 @@ public class BoardService {
         String ext = originalFilename.substring(originalFilename.lastIndexOf('.') + 1);
         String uniqueFileName = UUID.randomUUID().toString() + "." + ext;
 
-        // FTP 업로드
-//        uploadFileToFtp(file, uniqueFileName);
         // 디렉터리 생성 체크
         File directory = new File(uploadFolder);
         if (!directory.exists()) {
@@ -103,19 +101,12 @@ public class BoardService {
 
     }
 
-//    private void uploadFileToFtp(MultipartFile file, String fileName) throws IOException {
-//        Client ftpClient = new Client();
-//
-//        ftpClient.connect("4.217.186.166", 21);
-//        ftpClient.login("aivler", "aivle202406");
-//
-//        ftpClient.setFileType(Client.BINARY_FILE_TYPE);
-//
-//        try (InputStream inputStream = file.getInputStream()) {
-//            ftpClient.storeFile(FTP_UPLOAD_DIR + fileName, inputStream);
-//        } finally {
-//            ftpClient.logout();
-//            ftpClient.disconnect();
-//        }
-//    }
+    public Board getPostByBoardSn(int boardSn) {
+        return boardMapper.getPostByBoardSn(boardSn);
+    }
+
+    public void deletePost(int boardSn) {
+        boardMapper.deletePost(boardSn);
+    }
+
 }

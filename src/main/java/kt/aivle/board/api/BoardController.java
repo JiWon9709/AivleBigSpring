@@ -3,10 +3,7 @@ package kt.aivle.board.api;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
-import kt.aivle.board.model.Board;
-import kt.aivle.board.model.BoardListResponse;
-import kt.aivle.board.model.BoardRequest;
-import kt.aivle.board.model.GongoListResponse;
+import kt.aivle.board.model.*;
 import kt.aivle.board.service.BoardService;
 import kt.aivle.member.service.JwtTokenProvider;
 import kt.aivle.member.service.RefreshTokenService;
@@ -23,7 +20,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Api(tags = "board", description = "게시판 api")
 @RestController
@@ -47,6 +47,17 @@ public class BoardController {
         return boardlist;
     }
 
+    @ApiOperation(value="게시글 이미지불러오기")
+    @GetMapping("/board/images")
+    public ResponseEntity<List<ImgEntity>> getImagesByBoardSn(@RequestParam("boardSn") int boardSn) {
+//        try {
+            List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+        return ResponseEntity.ok(imgs);
+    }
+
     @ApiOperation(value="공고 리스트")
     @GetMapping("/gongoboard")
     public GongoListResponse getListGongo(){
@@ -59,6 +70,7 @@ public class BoardController {
         return gongolist;
     }
 
+    @ApiOperation(value="게시글 올리기")
     @PostMapping("/post-board")
     public ResponseEntity<String> createPost(@RequestParam("title") String title,
                                              @RequestParam("content") String content,
@@ -69,26 +81,26 @@ public class BoardController {
         b.setTitle(title);
         b.setContent(content);
         try {
-//            String uploadDir = "uploads/";
-//            String fileName = file.getOriginalFilename();
-//            String ext = fileName.substring(fileName.lastIndexOf('.') + 1);
-//
-//            // 디렉터리 생성
-//            File directory = new File(uploadDir);
-//            if (!directory.exists()) {
-//                directory.mkdirs();
-//            }
-//
-//            // 파일 저장
-//            Path filePath = Paths.get(uploadDir + fileName);
-//            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-//
-//
             // 게시글 저장
             boardService.savePost(b);
+
             // 이미지 저장 처리
             if (files != null && !files.isEmpty()) {
                 for (MultipartFile file : files) {
+                    // 이미지 타입 검증
+                    String contentType = file.getContentType();
+                    if (contentType == null || !contentType.startsWith("image/")) {
+                        return ResponseEntity.badRequest().body("이미지 파일만 업로드 가능합니다");
+                    }
+
+                    // 확장자 검증
+                    String filename = file.getOriginalFilename();
+                    String extension = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+                    Set<String> allowedExtensions = Set.of("jpg", "jpeg", "png", "gif");
+                    if (!allowedExtensions.contains(extension)) {
+                        return ResponseEntity.badRequest().body("허용되지 않는 파일 확장자입니다");
+                    }
+
                     if (!file.isEmpty()) {
                         boardService.uploadAndSaveImage("board", b.getBoardSn(), file);
                     }
@@ -101,4 +113,39 @@ public class BoardController {
         }
         return ResponseEntity.ok("게시글이 등록되었습니다.");
     }
+
+    @ApiOperation(value = "게시글 상세 조회")
+    @GetMapping("/board/detail")
+    public ResponseEntity<Map<String, Object>> getPostDetail(@RequestParam("boardSn") int boardSn, @RequestParam("userSn") int userSn) {
+        try {
+            Board post = boardService.getPostByBoardSn(boardSn);
+            boolean isOwner = (post.getUserSn() == userSn); // 본인 여부 확인
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("post", post);
+            response.put("isOwner", isOwner);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @ApiOperation(value = "게시글 삭제")
+    @DeleteMapping("/board/{boardSn}")
+    public ResponseEntity<String> deletePost(@PathVariable int boardSn, @RequestParam int userSn) {
+        try {
+            Board post = boardService.getPostByBoardSn(boardSn);
+
+            if (post == null || post.getUserSn() != userSn) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
+            }
+
+            boardService.deletePost(boardSn);
+            return ResponseEntity.ok("게시글이 삭제되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 삭제 중 오류가 발생했습니다.");
+        }
+    }
+
 }
