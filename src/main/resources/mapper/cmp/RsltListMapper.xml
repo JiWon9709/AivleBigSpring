@@ -180,7 +180,7 @@
     SELECT
     CONCAT(i.path, i.file_name) AS result
     FROM jutaek_dtl AS jd
-    LEFT JOIN img AS i ON i.jutaek_sn = jd.jutaek_sn
+    LEFT JOIN img AS i ON i.ref_sn = jd.jutaek_sn AND i.ref_table = 'jutaek'
     WHERE jd.jutaek_dtl_sn = #{jutaekDtlSn}
   </select>
 
