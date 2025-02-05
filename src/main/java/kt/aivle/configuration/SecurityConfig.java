@@ -42,8 +42,7 @@ public class SecurityConfig {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()  // ✅ OPTIONS 요청 허용
+                .authorizeRequests()                
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll() // preflight 요청 허용
                 // Swagger 관련 경로 permitAll 설정
                 .antMatchers(
@@ -67,12 +66,6 @@ public class SecurityConfig {
                 ).permitAll()
                 .antMatchers("/users/reissue").authenticated()  // JWT 검증 필요
                 .anyRequest().authenticated()
-                .and()
-                .exceptionHandling()
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("Unauthorized - Please login again");
-                })
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
                 //.addFilterBefore(jwtAuthenticationFilter, AnonymousAuthenticationFilter.class);
