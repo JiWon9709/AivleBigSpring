@@ -1,5 +1,7 @@
 package kt.aivle.member.api;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.swagger.annotations.ApiOperation;
 import kt.aivle.member.model.*;
 import kt.aivle.member.service.JwtTokenProvider;
@@ -11,8 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.Cookie;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -52,22 +54,15 @@ public class UserController {
         try {
             long startTime = System.currentTimeMillis();
 
-            // 1.유저 서비스 로그인 시간 체크
-            log.info("로그인 프로세스 시작");
             UserResponse userResponse = userService.login(loginRequest);
-            log.info("유저 서비스 로그인 소요시간: {}ms", System.currentTimeMillis() - startTime);
 
 
-            // 2. 토큰 생성 시간 체크
             long tokenStartTime = System.currentTimeMillis();
             TokenDto tokenDto = jwtTokenProvider.createToken(
                     String.valueOf((userResponse.getUserSn())),
                     Collections.singletonList(userResponse.getRole())
             );
-            log.info("토큰 생성 소요시간: {}ms", System.currentTimeMillis() - tokenStartTime);
 
-            // 3. 쿠키 설정 시작 시간 체크
-            long cookieStartTime = System.currentTimeMillis();
 
             //Access Token을 HttpOnly 쿠키에 설정
             Cookie accessTokenCookie = new Cookie("access_token", tokenDto.getAccessToken());
@@ -90,10 +85,6 @@ public class UserController {
             response.addCookie(accessTokenCookie);
             response.addCookie(refreshTokenCookie);
 
-            log.info("쿠키 설정 소요시간: {}ms", System.currentTimeMillis() - cookieStartTime);
-
-            // 4. 전체 프로세스 완료시간 체크
-            log.info("전체 로그인 프로세스 완료 시간: {}ms", System.currentTimeMillis() - startTime);
 
             return ResponseEntity.ok(new LoginResponse(
                     200,
@@ -121,26 +112,53 @@ public class UserController {
 
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
+                    log.info("Cookie Found: {} = {}", cookie.getName(), cookie.getValue()); // 로그 추가
                     if (cookie.getName().equals("refresh_token")) {
                         refreshToken = cookie.getValue();
                         break;
                     }
                 }
             }
-
+            // refresh 토큰 없으면 즉시 로그아웃 유도
             if (refreshToken == null) {
+                log.warn("🚨 Refresh Token이 없습니다.");
+
+                // 쿠키에서 refresh token 삭제
+                deleteCookie(response, "refresh_token");
+                deleteCookie(response, "access_token");
+
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new TokenResponse(false, "Refresh Token이 없습니다.", null));
+                        .body(new TokenResponse(false, "NO_REFRESH_TOKEN", null));
             }
 
             // 토큰 재발급
-            TokenDto newTokenDto = jwtTokenProvider.refreshToken(refreshToken);
+            // 🚀 Refresh Token 검증 및 새로운 Access Token 발급
+            TokenDto newTokenDto;
+            try {
+                newTokenDto = jwtTokenProvider.refreshToken(refreshToken);
+            } catch (ExpiredJwtException e) {
+                log.warn("🚨 Refresh Token 만료됨.");
+
+                // 쿠키 삭제
+                deleteCookie(response, "refresh_token");
+                deleteCookie(response, "access_token");
+
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new TokenResponse(false, "EXPIRED_REFRESH_TOKEN", null));
+            } catch (JwtException e) {
+                log.warn("🚨 Refresh Token 검증 실패.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new TokenResponse(false, "유효하지 않은 Refresh Token입니다.", null));
+            }
+
+            log.info("✅ 새 Access Token 발급 완료: {}", newTokenDto.getAccessToken());
 
             // 새로운 Access Token을 쿠키에 설정
             Cookie accessTokenCookie = new Cookie("access_token", newTokenDto.getAccessToken());
             accessTokenCookie.setHttpOnly(true);
             accessTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
             accessTokenCookie.setPath("/");
+            accessTokenCookie.setMaxAge((int) (JwtTokenProvider.ACCESS_TOKEN_EXPIRE_TIME / 1000));
 
             response.addCookie(accessTokenCookie);
 
@@ -148,9 +166,20 @@ public class UserController {
                     .body(new TokenResponse(true, "토큰이 성공적으로 재발급되었스빈다.", null));
 
         } catch (RuntimeException e) {
+            log.error("🚨 토큰 재발급 실패: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new TokenResponse(false, "토큰 재발급 실패: " + e.getMessage(), null));
+                    .body(new TokenResponse(false, "TOKEN_REISSUE_FAILED: ", null));
         }
+    }
+
+    // ✅ 쿠키 삭제 메서드 추가
+    private void deleteCookie(HttpServletResponse response, String cookieName) {
+        Cookie cookie = new Cookie(cookieName, null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 
     @ApiOperation(value = "내 이름 받아오기(헤더)")
