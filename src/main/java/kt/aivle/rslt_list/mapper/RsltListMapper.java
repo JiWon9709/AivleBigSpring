@@ -70,4 +70,12 @@ public interface RsltListMapper {
    * @return
    */
   public int regImg(ImgEntity imgEntity);
+
+  /**
+   * 주택 사진정보
+   *
+   * @param jutaekDtlSn
+   * @return
+   */
+  public List<String> getJutaekImg(Long jutaekDtlSn);
 }

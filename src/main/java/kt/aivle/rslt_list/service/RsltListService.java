@@ -80,6 +80,13 @@ public class RsltListService {
         result.setResultCode(BaseMsg.FAILED.getCode());
       } else {
         List<JutaekInfo> infoList = rsltListMapper.getJutaekList(jutaekListRequest);
+        //사진정보 넣기
+        for (int i = 0; i < infoList.size(); i++) {
+          List<String> jutaekImgInfo = rsltListMapper.getJutaekImg(infoList.get(i).getJutaekDtlSn());
+          if (jutaekImgInfo != null && jutaekImgInfo.size() > 0) {
+            infoList.get(i).setJutaekImg(jutaekImgInfo);
+          }
+        }
         result.setData(infoList);
         result.setTotalCount(jutaekListCnt);
       }

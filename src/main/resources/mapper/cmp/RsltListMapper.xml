@@ -171,6 +171,19 @@
     WHERE jd.jutaek_dtl_sn = #{jutaekDtlSn}
   </select>
 
+  <!--주택 사진정보 -->
+  <select
+    id="getJutaekImg"
+    resultType="String"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper.getJutaekImg*/
+    SELECT
+    CONCAT(i.path, i.file_name) AS result
+    FROM jutaek_dtl AS jd
+    LEFT JOIN img AS i ON i.ref_sn = jd.jutaek_sn AND i.ref_table = 'jutaek'
+    WHERE jd.jutaek_dtl_sn = #{jutaekDtlSn}
+  </select>
+
   <!--이미지 서버 등록-->
   <insert
     id="regImg"

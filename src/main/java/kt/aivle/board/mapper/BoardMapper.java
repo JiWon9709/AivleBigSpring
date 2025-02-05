@@ -5,6 +5,7 @@ import kt.aivle.board.model.Board;
 import kt.aivle.board.model.BoardListResponse;
 import kt.aivle.board.model.BoardRequest;
 import kt.aivle.board.model.Gongo;
+import kt.aivle.board.model.ImgEntity;
 
 import java.util.List;
 
@@ -13,4 +14,5 @@ public interface BoardMapper {
     public List<Board> getListBoard();
     public void saveboard(Board board);
     public List<Gongo> getListGongo();
+    public int regImg(ImgEntity imgEntity);
 }
