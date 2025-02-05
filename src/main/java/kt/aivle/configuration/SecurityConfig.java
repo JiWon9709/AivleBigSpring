@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
 
@@ -59,16 +60,24 @@ public class SecurityConfig {
                         "/users/check-email",
                         "/users/forgot-password",
                         "/users/verify-code",
+                        "/users/reissue",
+                        "/users/logout",
                         "/gongo/active",
                         "/board",
                         "/post-board",
                         "/reg-img"
                 ).permitAll()
-                .antMatchers("/users/reissue").authenticated()  // JWT 검증 필요
                 .anyRequest().authenticated()
                 .and()
+                .exceptionHandling()
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("{\"status\": 401, \"message\": \"Unauthorized - Please login again\"}");
+
+                })
+                .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-                //.addFilterBefore(jwtAuthenticationFilter, AnonymousAuthenticationFilter.class);
 
         return http.build();
     }
