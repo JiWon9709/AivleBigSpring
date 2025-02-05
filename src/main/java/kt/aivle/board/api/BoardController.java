@@ -8,7 +8,6 @@ import kt.aivle.board.model.BoardListResponse;
 import kt.aivle.board.model.BoardRequest;
 import kt.aivle.board.model.GongoListResponse;
 import kt.aivle.board.service.BoardService;
-import kt.aivle.file.service.ImgService;
 import kt.aivle.member.service.JwtTokenProvider;
 import kt.aivle.member.service.RefreshTokenService;
 import kt.aivle.member.service.UserService;
@@ -35,9 +34,6 @@ public class BoardController {
 
     @Autowired
     private BoardService boardService;
-
-    @Autowired
-    private ImgService imgService;
 
     @ApiOperation(value="게시글 리스트")
     @GetMapping("/board")
