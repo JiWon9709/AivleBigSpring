@@ -55,7 +55,7 @@ public class RsltListController {
 
   @ApiOperation(value = "즐겨찾기 등록, 해제")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResListModel.class)})
-  @PostMapping(value = "/rslt-list",
+  @PostMapping(value = "/fav-ctl",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public BaseResModel favoriteCtl(@ApiParam(value = "즐겨찾기 등록, 해제", required = true) @RequestBody FavExChkRequest favExChkRequest) {
