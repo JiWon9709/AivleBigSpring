@@ -5,6 +5,8 @@ import kt.aivle.base.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class JutaekInfo {
@@ -75,4 +77,10 @@ public class JutaekInfo {
    */
   @ApiModelProperty(required = true, notes = "주소", position = 10)
   private String jutaekAddress;
+
+  /**
+   * 사진 리스트
+   */
+  @ApiModelProperty(required = true, notes = "사진 리스트", position = 11)
+  private List<String> jutaekImg;
 }
