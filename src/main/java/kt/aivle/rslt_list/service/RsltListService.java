@@ -80,11 +80,22 @@ public class RsltListService {
         result.setResultCode(BaseMsg.FAILED.getCode());
       } else {
         List<JutaekInfo> infoList = rsltListMapper.getJutaekList(jutaekListRequest);
-        //사진정보 넣기
         for (int i = 0; i < infoList.size(); i++) {
+          //사진정보 넣기
           List<String> jutaekImgInfo = rsltListMapper.getJutaekImg(infoList.get(i).getJutaekDtlSn());
           if (jutaekImgInfo != null && jutaekImgInfo.size() > 0) {
             infoList.get(i).setJutaekImg(jutaekImgInfo);
+          }
+          //즐겨찾기 정보 넣기
+          FavExChkRequest favExChkRequest = new FavExChkRequest();
+          favExChkRequest.setGongoSn(jutaekListRequest.getGongoSn());
+          favExChkRequest.setUserSn(jutaekListRequest.getUserSn());
+          favExChkRequest.setJutaekDtlSn(infoList.get(i).getJutaekDtlSn());
+          Long favoriteSn = rsltListMapper.getFavExChk(favExChkRequest);
+          if (favoriteSn > 0) {
+            infoList.get(i).setFavYn("Y");
+          } else {
+            infoList.get(i).setFavYn("N");
           }
         }
         result.setData(infoList);
@@ -112,6 +123,36 @@ public class RsltListService {
       }
     } catch (Exception e) {
       result.setResultMsg("조회 중 에러가 발생했습니다." + e);
+      result.setResultCode(BaseMsg.FAILED.getCode());
+    }
+    return result;
+  }
+
+  /**
+   * 즐겨찾기
+   *
+   * @return
+   */
+  @Transactional
+  public BaseResModel favoriteCtl(FavExChkRequest favExChkRequest) {
+    BaseResModel result = new BaseResModel();
+    try {
+      Long favoriteSn = rsltListMapper.getFavExChk(favExChkRequest);
+      if (favoriteSn != null && favoriteSn > 0) {
+        int cnt = rsltListMapper.updFavYn(favExChkRequest.getJutaekDtlSn());
+        if (cnt == 0) {
+          result.setResultMsg("즐겨찾기 변경에 실패했습니다.");
+          result.setResultCode(BaseMsg.FAILED.getCode());
+        }
+      } else {
+        int cnt = rsltListMapper.regFav(favExChkRequest);
+        if (cnt == 0) {
+          result.setResultMsg("즐겨찾기 등록에 실패했습니다.");
+          result.setResultCode(BaseMsg.FAILED.getCode());
+        }
+      }
+    } catch (Exception e) {
+      result.setResultMsg("즐겨찾기 중 에러가 발생했습니다." + e);
       result.setResultCode(BaseMsg.FAILED.getCode());
     }
     return result;
@@ -160,7 +201,6 @@ public class RsltListService {
         return result;
       }
     }
-
     return result;
   }
 

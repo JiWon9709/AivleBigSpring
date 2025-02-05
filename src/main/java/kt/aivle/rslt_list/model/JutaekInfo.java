@@ -83,4 +83,10 @@ public class JutaekInfo {
    */
   @ApiModelProperty(required = true, notes = "사진 리스트", position = 11)
   private List<String> jutaekImg;
+
+  /**
+   * 즐겨찾기 여부
+   */
+  @ApiModelProperty(required = true, notes = "즐겨찾기 여부", position = 12)
+  private String favYn;
 }

@@ -12,7 +12,10 @@ import java.util.List;
 @DATA_SOURCE
 public interface BoardMapper {
     public List<Board> getListBoard();
+    public List<ImgEntity> findImagesByBoardSn(int boardSn);
     public void saveboard(Board board);
     public List<Gongo> getListGongo();
     public int regImg(ImgEntity imgEntity);
+    public Board getPostByBoardSn(int boardSn);
+    public void deletePost(int boardSn);
 }
