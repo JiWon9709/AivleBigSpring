@@ -70,4 +70,36 @@ public interface RsltListMapper {
    * @return
    */
   public int regImg(ImgEntity imgEntity);
+
+  /**
+   * 주택 사진정보
+   *
+   * @param jutaekDtlSn
+   * @return
+   */
+  public List<String> getJutaekImg(Long jutaekDtlSn);
+
+  /**
+   * db에 즐겨찾기정보 유무 확인
+   *
+   * @param favExChkRequest
+   * @return
+   */
+  public Long getFavExChk(FavExChkRequest favExChkRequest);
+
+  /**
+   * 즐겨찾기 등록
+   *
+   * @param favExChkRequest
+   * @return
+   */
+  public int regFav(FavExChkRequest favExChkRequest);
+
+  /**
+   * 즐겨찾기 여부 변경
+   *
+   * @param jutaekDtlSn
+   * @return
+   */
+  public int updFavYn(Long jutaekDtlSn);
 }
