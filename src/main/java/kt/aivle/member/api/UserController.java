@@ -62,7 +62,7 @@ public class UserController {
             long tokenStartTime = System.currentTimeMillis();
             TokenDto tokenDto = jwtTokenProvider.createToken(
                     String.valueOf((userResponse.getUserSn())),
-                    Collections.singletonList("ROLE_USER")
+                    Collections.singletonList(userResponse.getRole())
             );
             log.info("토큰 생성 소요시간: {}ms", System.currentTimeMillis() - tokenStartTime);
 

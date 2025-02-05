@@ -8,18 +8,18 @@
         INSERT INTO user (
             user_name, email, password, gender,
             address, zip_code, telno, use_yn,
-            created_dt, updated_dt
+            created_dt, updated_dt, role
         ) VALUES (
             #{userName}, #{email}, #{password}, #{gender},
             #{address}, #{zipCode}, #{telno}, 'Y',
-            NOW(), NOW()
+            NOW(), NOW(), 'ROLE_USER'
         )
     </insert>
 
     <!-- 이메일로 사용자 정보 조회 -->
     <select id="findByEmail" parameterType="String" resultType="kt.aivle.member.model.UserResponse">
         /* UserMapper.findByEmail */
-        SELECT email, user_sn, use_yn
+        SELECT email, user_sn, use_yn, role
         FROM user
         WHERE email = #{email}
         AND use_yn = 'Y'
@@ -28,7 +28,7 @@
     <!-- 인증용 사용자 정보 조회 -->
     <select id="findByEmailForAuth" parameterType="String" resultType="kt.aivle.member.model.UserAuth">
         /* UserMapper.findByEmailForAuth */
-        SELECT email, password, use_yn
+        SELECT email, password, use_yn, role
         FROM user
         WHERE email = #{email}
         AND use_yn = 'Y'
@@ -37,7 +37,7 @@
     <!-- 헤더에 이름 표시를 위한 이름 조회 -->
     <select id="findNameByUserSn" parameterType="Long" resultType="kt.aivle.member.model.UserResponse">
         /* UserMapper.findNameByUserSn */
-        SELECT user_sn, user_name
+        SELECT user_sn, user_name, role
         FROM user
         WHERE user_sn = #{userSn}
         AND use_yn = 'Y'
