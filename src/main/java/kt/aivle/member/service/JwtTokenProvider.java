@@ -33,7 +33,7 @@ public class JwtTokenProvider {
     private String secretKey;
     private Key key;
     // 토큰 만료 시간 설정
-    public static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30;   //30분
+    public static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30;   // 30분
     public static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24;  //24시간
 
     @PostConstruct
@@ -105,17 +105,21 @@ public class JwtTokenProvider {
 
     // access 만료되어서 reissue 요청한 사용자에 대해 리프레시 토큰 이용한 access 토큰 재발급
     public TokenDto refreshToken(String refreshToken) {
-        log.debug("Attempting to refresh token: {}", refreshToken);
+        log.info("🚀 Refresh 토큰 검증 중: {}", refreshToken);
         try {
             Claims claims = parseClaims(refreshToken);
             String userPk = claims.getSubject();
             List<String> roles = claims.get("roles", List.class);
 
             // 액세스 토큰만 새로 발급
+            log.info("✅ Refresh Token 유효: userPk={}, roles={}", userPk, roles);
             return createAccessTokenByRefresh(userPk, roles, refreshToken);
         } catch (ExpiredJwtException e) {
-            log.warn("Refresh token expired: {}", e.getMessage());
+            log.warn("🚨 Refresh Token 만료: {}", e.getMessage());
             throw new RuntimeException("만료된 Refresh Token입니다.");
+        } catch (JwtException e) {
+            log.warn("🚨 Refresh Token 검증 실패: {}", e.getMessage());
+            throw new RuntimeException("유효하지 않은 Refresh Token입니다.");
         }
     }
 
@@ -142,18 +146,25 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         log.debug("Validating token: {}", token);
         try {
-            Jwts.parserBuilder()
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(token);
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            // 토큰이 만료되었는지 확인
+            if (claims.getExpiration().before(new Date())) {
+                throw new ExpiredJwtException(null, claims, "Token has expired");
+            }
+
             log.info("Token is valid.");
             return true;
         } catch (ExpiredJwtException e) {
             log.warn("Expired JWT token: {}", e.getMessage());
-            throw e;
+            return false;  // 만료된 토큰을 false로 반환
         } catch (JwtException e) {
             log.warn("JWT token error: {}", e.getMessage());
-            throw e;
+            return false;
         }
     }
 

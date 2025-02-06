@@ -102,4 +102,12 @@ public interface RsltListMapper {
    * @return
    */
   public int updFavYn(Long jutaekDtlSn);
+
+  /**
+   * 즐겨찾기 yn
+   *
+   * @param favoriteSn
+   * @return
+   */
+  public String getFavYn(Long favoriteSn);
 }

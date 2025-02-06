@@ -228,6 +228,19 @@
     ) AS result;
   </select>
 
+  <!--db에 즐겨찾기정보 유무 확인 -->
+  <select
+    id="getFavYn"
+    resultType="String"
+  >
+    /* kt.aivle.rslt_list.RsltListMapper.getFavYn*/
+    SELECT
+    use_yn
+    FROM favorite
+    WHERE favorite_sn = #{favoriteSn}
+
+  </select>
+
   <!--즐겨찾기 등록-->
   <insert
     id="regFav"
@@ -254,8 +267,10 @@
   >
     /* kt.aivle.rslt_list.RsltListMapper,updFavYn */
     UPDATE favorite
-    SET
-    use_yn = 'Y'
+    SET use_yn = CASE
+    WHEN use_yn = 'Y' THEN 'N'
+    ELSE 'Y'
+    END
     WHERE favorite_sn = #{favoriteSn}
   </update>
 </mapper>
