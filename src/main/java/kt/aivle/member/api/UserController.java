@@ -9,7 +9,9 @@ import kt.aivle.member.service.RefreshTokenService;
 import kt.aivle.member.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -52,41 +54,37 @@ public class UserController {
             @RequestBody LoginRequest loginRequest,
             HttpServletResponse response) {
         try {
-            long startTime = System.currentTimeMillis();
 
             UserResponse userResponse = userService.login(loginRequest);
 
-
-            long tokenStartTime = System.currentTimeMillis();
             TokenDto tokenDto = jwtTokenProvider.createToken(
                     String.valueOf((userResponse.getUserSn())),
                     Collections.singletonList(userResponse.getRole())
             );
 
 
-            //Access Token을 HttpOnly 쿠키에 설정
-            Cookie accessTokenCookie = new Cookie("access_token", tokenDto.getAccessToken());
-            accessTokenCookie.setHttpOnly(true);
-            accessTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
-            accessTokenCookie.setPath("/");
-            accessTokenCookie.setMaxAge((int) (JwtTokenProvider.ACCESS_TOKEN_EXPIRE_TIME / 1000)); // 30분
-            //accessTokenCookie.setSameSite("Strict"); //  CSRF 방어, https 변경 후 CookieSerializer 사용해서 적용 가능
+            // ✅ Access Token 쿠키 설정 (SameSite=None 적용 가능)
+            ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", tokenDto.getAccessToken())
+                    .httpOnly(true)
+                    .secure(false) // HTTP 환경에서는 false, HTTPS에서는 true
+                    .sameSite("Lax") // ✅ SameSite 설정 가능
+                    .path("/")
+                    .maxAge((int) (JwtTokenProvider.ACCESS_TOKEN_EXPIRE_TIME / 1000)) // 30분
+                    .build();
 
+            // ✅ Refresh Token 쿠키 설정 (SameSite=None 적용 가능)
+            ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", tokenDto.getRefreshToken())
+                    .httpOnly(true)
+                    .secure(false)
+                    .sameSite("Lax")
+                    .path("/")
+                    .maxAge((int) (JwtTokenProvider.REFRESH_TOKEN_EXPIRE_TIME / 1000)) // 24시간
+                    .build();
 
-            // Refresh Token을 HttpOnly 쿠키에 설정
-            Cookie refreshTokenCookie = new Cookie("refresh_token", tokenDto.getRefreshToken());
-            refreshTokenCookie.setHttpOnly(true);
-            refreshTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
-            refreshTokenCookie.setPath("/");
-            refreshTokenCookie.setMaxAge((int) (JwtTokenProvider.REFRESH_TOKEN_EXPIRE_TIME / 1000)); // 24시간
-            //refreshTokenCookie.setSameStie("Strict"); //  CSRF 방어, https 변경 후 CookieSerializer 사용해서 적용 가능
-
-
-            response.addCookie(accessTokenCookie);
-            response.addCookie(refreshTokenCookie);
-
-
-            return ResponseEntity.ok(new LoginResponse(
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                    .body(new LoginResponse(
                     200,
                     "로그인이 완료되었습니다.",
                     userResponse
@@ -122,11 +120,7 @@ public class UserController {
             // refresh 토큰 없으면 즉시 로그아웃 유도
             if (refreshToken == null) {
                 log.warn("🚨 Refresh Token이 없습니다.");
-
-                // 쿠키에서 refresh token 삭제
-                deleteCookie(response, "refresh_token");
-                deleteCookie(response, "access_token");
-
+//                return deleteTokensAndLogout();
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new TokenResponse(false, "NO_REFRESH_TOKEN", null));
             }
@@ -139,9 +133,6 @@ public class UserController {
             } catch (ExpiredJwtException e) {
                 log.warn("🚨 Refresh Token 만료됨.");
 
-                // 쿠키 삭제
-                deleteCookie(response, "refresh_token");
-                deleteCookie(response, "access_token");
 
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new TokenResponse(false, "EXPIRED_REFRESH_TOKEN", null));
@@ -153,17 +144,18 @@ public class UserController {
 
             log.info("✅ 새 Access Token 발급 완료: {}", newTokenDto.getAccessToken());
 
-            // 새로운 Access Token을 쿠키에 설정
-            Cookie accessTokenCookie = new Cookie("access_token", newTokenDto.getAccessToken());
-            accessTokenCookie.setHttpOnly(true);
-            accessTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
-            accessTokenCookie.setPath("/");
-            accessTokenCookie.setMaxAge((int) (JwtTokenProvider.ACCESS_TOKEN_EXPIRE_TIME / 1000));
-
-            response.addCookie(accessTokenCookie);
+            // ✅ 새로운 Access Token을 쿠키에 설정
+            ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", newTokenDto.getAccessToken())
+                    .httpOnly(true)
+                    .secure(false)
+                    .sameSite("Lax")
+                    .path("/")
+                    .maxAge((int) (JwtTokenProvider.ACCESS_TOKEN_EXPIRE_TIME / 1000))
+                    .build();
 
             return ResponseEntity.ok()
-                    .body(new TokenResponse(true, "토큰이 성공적으로 재발급되었스빈다.", null));
+                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                    .body(new TokenResponse(true, "토큰이 성공적으로 재발급되었습니다.", null));
 
         } catch (RuntimeException e) {
             log.error("🚨 토큰 재발급 실패: {}", e.getMessage());
@@ -172,15 +164,63 @@ public class UserController {
         }
     }
 
-    // ✅ 쿠키 삭제 메서드 추가
-    private void deleteCookie(HttpServletResponse response, String cookieName) {
-        Cookie cookie = new Cookie(cookieName, null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+
+    @ApiOperation(value = "로그아웃")
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        // ✅ Access Token 쿠키 삭제
+        ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0) // 즉시 만료
+                .build();
+
+        // ✅ Refresh Token 쿠키 삭제
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .build();
     }
+
+    private ResponseEntity<?> deleteTokensAndLogout() {
+        // ✅ Access Token 쿠키 삭제
+        ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0) // 즉시 만료
+                .build();
+
+        // ✅ Refresh Token 쿠키 삭제
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(new TokenResponse(false, "로그인이 필요합니다.", null));
+    }
+
+
+
+
+
 
     @ApiOperation(value = "내 이름 받아오기(헤더)")
     @GetMapping("/me")
@@ -209,30 +249,6 @@ public class UserController {
                     .body(new LoginResponse(500, "서버 오류가 발생했습니다.", null));
         }
     }
-
-    @ApiOperation(value = "로그아웃")
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
-        // Access Token 쿠키 삭제
-        Cookie accesTokenCookie = new Cookie("access_token", null);
-        accesTokenCookie.setHttpOnly(true);
-        accesTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
-        accesTokenCookie.setMaxAge(0);
-        accesTokenCookie.setPath("/");
-
-        // Refresh Token 쿠키 삭제
-        Cookie refreshTokenCookie = new Cookie("refresh_token", null);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(false); // 현재 배포된 게 http환경이라 false, 추후 https로 바꾸면 true로 변경 필요
-        refreshTokenCookie.setMaxAge(0);
-        refreshTokenCookie.setPath("/");
-
-        response.addCookie(accesTokenCookie);
-        response.addCookie(refreshTokenCookie);
-
-        return ResponseEntity.ok().build();
-    }
-
 
 
     @ApiOperation(value = "이메일 중복 체크")

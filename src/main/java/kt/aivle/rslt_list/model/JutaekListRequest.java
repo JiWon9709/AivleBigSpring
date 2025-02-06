@@ -89,4 +89,10 @@ public class JutaekListRequest extends BaseListModel {
    */
   @ApiModelProperty(required = true, notes = "청약점수", position = 13)
   private Long inputScore;
+
+  /**
+   * 사용자의 예측점수
+   */
+  @ApiModelProperty(required = true, notes = "사용자의 예측점수", position = 14)
+  private Long qtyPred;
 }
