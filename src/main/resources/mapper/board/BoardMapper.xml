@@ -40,6 +40,7 @@
             gongo_sn DESC
     </select>
 
+    <!--게시글 등록-->
     <insert id="saveboard" parameterType="kt.aivle.board.model.Board" useGeneratedKeys="true" keyProperty="boardSn">
         INSERT INTO board (
         user_sn,
@@ -86,6 +87,7 @@
         );
     </insert>
 
+    <!-- 이미지 테이블에서 게시판에 해당하는 이미지 찾기-->
     <select id="findImagesByBoardSn" resultType="kt.aivle.board.model.ImgEntity">
         SELECT *
         FROM img
@@ -93,11 +95,40 @@
     </select>
     
     <select id="getPostByBoardSn" resultType="kt.aivle.board.model.Board">
-        SELECT * FROM board WHERE board_sn = #{boardSn}
+        SELECT
+            board_sn,
+            user_name AS userName,
+            b.user_sn,
+            title,
+            content,
+            b.created_dt AS createdDt
+        FROM
+        board b
+        JOIN
+        user u ON b.user_sn = u.user_sn
+        WHERE
+        board_yn = 'Y' AND board_sn = #{boardSn}
     </select>
-    
-    <delete id="deletePost">
-        DELETE FROM board WHERE board_sn = #{boardSn}
-    </delete>
+
+    <!-- 게시글 소프트 삭제 기능(실제로는 n으로 바꾸기) -->
+    <update id="softDeletePost">
+        UPDATE board
+        SET board_yn = 'N'
+        WHERE board_sn = #{boardSn}
+    </update>
+
+    <!-- 게시글의 이미지 소프트 삭제 기능(실제로는 n으로 바꾸기) -->
+    <update id="softDeleteImg">
+        UPDATE img
+        SET use_yn = 'N'
+        WHERE ref_sn = #{boardSn}
+    </update>
+
+    <!--게시글 수정-->
+    <update id="updatePost">
+        UPDATE board
+        SET title = #{title}, content = #{content}, updated_dt = NOW()
+        WHERE board_sn = #{boardSn}
+    </update>
 
 </mapper>

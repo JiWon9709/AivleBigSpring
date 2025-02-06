@@ -69,7 +69,6 @@ public class BoardService {
 
     @Transactional
     public void uploadAndSaveImage(String refTable, int refSn, MultipartFile file) throws IOException {
-//        BufferedImage image = ImageIO.read(file.get(i).getInputStream());
         // 파일 이름 및 확장자 생성
         String uploadFolder = dir + "img";
         String originalFilename = file.getOriginalFilename();
@@ -101,12 +100,25 @@ public class BoardService {
 
     }
 
+    // 게시글 상세조회
     public Board getPostByBoardSn(int boardSn) {
         return boardMapper.getPostByBoardSn(boardSn);
     }
 
-    public void deletePost(int boardSn) {
-        boardMapper.deletePost(boardSn);
+    // 소프트게시글 삭제
+    public void softDeletePost(int boardSn) {
+        boardMapper.softDeletePost(boardSn);
     }
+
+    // 소프트이미지 삭제
+    public void softDeleteImg(int boardSn) {
+        boardMapper.softDeleteImg(boardSn);
+    }
+
+    // 게시글 수정
+    public void updatePost(Board board) {
+        boardMapper.updatePost(board);
+    }
+
 
 }
