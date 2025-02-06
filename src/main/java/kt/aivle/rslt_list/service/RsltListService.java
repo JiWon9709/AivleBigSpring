@@ -101,7 +101,19 @@ public class RsltListService {
             }
           }
           //예측점수 순위로 변경
-
+          int qtyPred = infoList.get(i).getQtyPred();
+          if (qtyPred >= 22 && qtyPred <= 32) {
+            infoList.get(i).setPredRank(1);
+            infoList.get(i).setPredScore(qtyPred - 21);
+          } else if (qtyPred >= 11 && qtyPred <= 21) {
+            infoList.get(i).setPredRank(2);
+            infoList.get(i).setPredScore(qtyPred - 10);
+          } else if (qtyPred >= 0 && qtyPred <= 10) {
+            infoList.get(i).setPredRank(3);
+            infoList.get(i).setPredScore(qtyPred);
+          } else {
+            System.out.println("Unexpected qtyPred value: " + qtyPred);
+          }
         }
         result.setData(infoList);
         result.setTotalCount(jutaekListCnt);
