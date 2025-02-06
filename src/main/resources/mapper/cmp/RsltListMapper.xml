@@ -117,33 +117,33 @@
   >
     /* kt.aivle.rslt_list.RsltListMapper.getJutaekList*/
     SELECT
-    jd.jutaek_dtl_sn
-    , jd.jutaek_sn
-    , jd.jutaek_size
-    , jd.residential_area
-    , jd.common_area
-    , jd.other_area
-    , jd.jutaek_type
+    jd.jutaek_dtl_sn,
+    jd.jutaek_sn,
+    jd.jutaek_size,
+    jd.jutaek_type,
     <choose>
       <when test="inputRank == 1">
-        , jd.a_guarantee AS guarantee
-        , jd.a_monthly AS monthly
+        jd.a_guarantee AS guarantee,
+        jd.a_monthly AS monthly,
       </when>
       <otherwise>
-        , jd.b_guarantee AS guarantee
-        , jd.b_monthly AS monthly
+        jd.b_guarantee AS guarantee,
+        jd.b_monthly AS monthly,
       </otherwise>
     </choose>
-    , j.jutaek_name
-    , j.jutaek_address
+    j.jutaek_name,
+    j.jutaek_address
     FROM jutaek_dtl AS jd
-    LEFT JOIN jutaek AS j ON j.jutaek_sn = jd.jutaek_sn
-    WHERE jd.jutaek_sn IN(
+    LEFT JOIN jutaek AS j
+    ON j.jutaek_sn = jd.jutaek_sn
+    WHERE jd.jutaek_sn IN (
     <foreach item="item" collection="jutaekSnList" separator=",">
       #{item}
     </foreach>
     )
-    <include refid="getJutaekList" />
+    <if test="qtyPred != null">
+      ORDER BY ABS(CAST(jd.qty_pred AS SIGNED) - #{qtyPred})
+    </if>
     <if test='pageNum gt 0'>
       LIMIT #{pageOffset}, #{pageSize}
     </if>
@@ -159,9 +159,6 @@
     jd.jutaek_dtl_sn
     , jd.jutaek_sn
     , jd.jutaek_size
-    , jd.residential_area
-    , jd.common_area
-    , jd.other_area
     , j.jutaek_name
     , j.jutaek_address
     , j.longitude

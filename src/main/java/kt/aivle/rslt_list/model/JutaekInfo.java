@@ -89,4 +89,10 @@ public class JutaekInfo {
    */
   @ApiModelProperty(required = true, notes = "즐겨찾기 여부", position = 12)
   private String favYn;
+
+  /**
+   * 예측점수
+   */
+  @ApiModelProperty(required = true, notes = "예측점수", position = 12)
+  private int qtyPred;
 }
