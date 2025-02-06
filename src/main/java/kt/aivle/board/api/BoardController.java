@@ -119,11 +119,13 @@ public class BoardController {
     public ResponseEntity<Map<String, Object>> getPostDetail(@RequestParam("boardSn") int boardSn, @RequestParam("userSn") int userSn) {
         try {
             Board post = boardService.getPostByBoardSn(boardSn);
+//            List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
             boolean isOwner = (post.getUserSn() == userSn); // 본인 여부 확인
 
             Map<String, Object> response = new HashMap<>();
             response.put("post", post);
             response.put("isOwner", isOwner);
+//            response.put("imgs", imgs);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -131,21 +133,64 @@ public class BoardController {
         }
     }
 
-    @ApiOperation(value = "게시글 삭제")
-    @DeleteMapping("/board/{boardSn}")
-    public ResponseEntity<String> deletePost(@PathVariable int boardSn, @RequestParam int userSn) {
+    @ApiOperation(value = "게시글 소프트 삭제")
+    @PutMapping("/board/{boardSn}")
+    public ResponseEntity<String> softDeletePost(@PathVariable int boardSn, @RequestParam int userSn) {
         try {
             Board post = boardService.getPostByBoardSn(boardSn);
-
             if (post == null || post.getUserSn() != userSn) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
             }
-
-            boardService.deletePost(boardSn);
+            boardService.softDeletePost(boardSn);
+            // img 데이터도 삭제
+            List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
+            if (!imgs.isEmpty()) {
+                boardService.softDeleteImg(boardSn);
+            }
             return ResponseEntity.ok("게시글이 삭제되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 삭제 중 오류가 발생했습니다.");
         }
     }
+
+    @ApiOperation(value = "게시글 수정")
+    @PostMapping("/board")
+    public ResponseEntity<String> updatePost(@RequestParam(value = "boardSn", required = false) Integer boardSn,
+                                             @RequestParam("title") String title,
+                                             @RequestParam("content") String content,
+                                             @RequestParam("userSn") int userSn,
+                                             @RequestParam(value = "files", required = false) List<MultipartFile> files,
+                                             @RequestParam(value = "deletedFileIds", required = false) List<Integer> deletedFileIds) {
+        try {
+            Board post = boardService.getPostByBoardSn(boardSn);
+            List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
+            if (post == null || post.getUserSn() != userSn) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
+            }
+            // 게시글 정보 설정 및 저장
+            post.setTitle(title);
+            post.setContent(content);
+            post.setUserSn(userSn);
+            boardService.updatePost(post);
+
+            // 이미지 파일 삭제 처리
+            if (deletedFileIds != null) {
+                for (int imgId : deletedFileIds) {
+                    boardService.softDeleteImg(imgId);
+                }
+            }
+
+            // 이미지 파일 저장 처리
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    boardService.uploadAndSaveImage("board", post.getBoardSn(), file);
+                }
+            }
+            return ResponseEntity.ok("게시글이 수정되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 수정 중 오류가 발생했습니다.");
+        }
+    }
+
 
 }

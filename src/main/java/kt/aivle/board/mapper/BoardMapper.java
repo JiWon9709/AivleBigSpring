@@ -17,5 +17,7 @@ public interface BoardMapper {
     public List<Gongo> getListGongo();
     public int regImg(ImgEntity imgEntity);
     public Board getPostByBoardSn(int boardSn);
-    public void deletePost(int boardSn);
+    public void softDeletePost(int boardSn);
+    public void softDeleteImg(int boardSn);
+    public void updatePost(Board board);
 }
