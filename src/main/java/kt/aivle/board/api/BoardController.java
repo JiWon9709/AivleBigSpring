@@ -47,16 +47,16 @@ public class BoardController {
         return boardlist;
     }
 
-    @ApiOperation(value="게시글 이미지불러오기")
-    @GetMapping("/board/images")
-    public ResponseEntity<List<ImgEntity>> getImagesByBoardSn(@RequestParam("boardSn") int boardSn) {
-//        try {
-            List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-        return ResponseEntity.ok(imgs);
-    }
+//    @ApiOperation(value="게시글 이미지불러오기")
+//    @GetMapping("/board/images")
+//    public ResponseEntity<List<ImgEntity>> getImagesByBoardSn(@RequestParam("boardSn") int boardSn) {
+////        try {
+//            List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
+////        } catch (Exception e) {
+////            throw new RuntimeException(e);
+////        }
+//        return ResponseEntity.ok(imgs);
+//    }
 
     @ApiOperation(value="공고 리스트")
     @GetMapping("/gongoboard")
@@ -119,13 +119,13 @@ public class BoardController {
     public ResponseEntity<Map<String, Object>> getPostDetail(@RequestParam("boardSn") int boardSn, @RequestParam("userSn") int userSn) {
         try {
             Board post = boardService.getPostByBoardSn(boardSn);
-//            List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
+            List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
             boolean isOwner = (post.getUserSn() == userSn); // 본인 여부 확인
 
             Map<String, Object> response = new HashMap<>();
             response.put("post", post);
             response.put("isOwner", isOwner);
-//            response.put("imgs", imgs);
+            response.put("imgs", imgs);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -176,7 +176,7 @@ public class BoardController {
             // 이미지 파일 삭제 처리
             if (deletedFileIds != null) {
                 for (int imgId : deletedFileIds) {
-                    boardService.softDeleteImg(imgId);
+                    boardService.deleteImage(imgId);
                 }
             }
 

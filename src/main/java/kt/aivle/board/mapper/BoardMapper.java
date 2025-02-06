@@ -19,5 +19,6 @@ public interface BoardMapper {
     public Board getPostByBoardSn(int boardSn);
     public void softDeletePost(int boardSn);
     public void softDeleteImg(int boardSn);
+    public void deleteImage(int imgSn);
     public void updatePost(Board board);
 }

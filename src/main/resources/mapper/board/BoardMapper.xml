@@ -91,7 +91,7 @@
     <select id="findImagesByBoardSn" resultType="kt.aivle.board.model.ImgEntity">
         SELECT *
         FROM img
-        WHERE ref_table = 'board' AND ref_sn = #{boardSn}
+        WHERE ref_table = 'board' AND ref_sn = #{boardSn} AND use_yn = 'Y'
     </select>
     
     <select id="getPostByBoardSn" resultType="kt.aivle.board.model.Board">
@@ -122,6 +122,13 @@
         UPDATE img
         SET use_yn = 'N'
         WHERE ref_sn = #{boardSn}
+    </update>
+
+    <!-- 게시글의 이미지 소프트 삭제 기능(실제로는 n으로 바꾸기) -->
+    <update id="deleteImage">
+        UPDATE img
+        SET use_yn = 'N'
+        WHERE img_sn = #{imgSn}
     </update>
 
     <!--게시글 수정-->
