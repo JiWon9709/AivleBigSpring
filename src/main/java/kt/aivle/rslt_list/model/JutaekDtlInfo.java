@@ -28,24 +28,6 @@ public class JutaekDtlInfo {
   private String jutaekSize;
 
   /**
-   * 거주공간
-   */
-  @ApiModelProperty(required = true, notes = "거주공간", position = 4)
-  private String residentialArea;
-
-  /**
-   * 공용공간
-   */
-  @ApiModelProperty(required = true, notes = "공용공간", position = 5)
-  private String commonArea;
-
-  /**
-   * 기타공간
-   */
-  @ApiModelProperty(required = true, notes = "기타공간", position = 6)
-  private String otherArea;
-
-  /**
    * 주택타입
    */
   @ApiModelProperty(required = true, notes = "주택타입", position = 7)

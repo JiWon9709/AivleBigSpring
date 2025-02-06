@@ -100,6 +100,8 @@ public class RsltListService {
               infoList.get(i).setFavYn("N");
             }
           }
+          //예측점수 순위로 변경
+
         }
         result.setData(infoList);
         result.setTotalCount(jutaekListCnt);
