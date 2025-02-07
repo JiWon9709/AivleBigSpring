@@ -91,8 +91,38 @@ public class JutaekInfo {
   private String favYn;
 
   /**
+   * 예측총점수
+   */
+  @ApiModelProperty(required = true, notes = "예측총점수", position = 13)
+  private int qtyPred;
+
+  /**
+   * 예측순위
+   */
+  @ApiModelProperty(required = true, notes = "예측순위", position = 14)
+  private int predRank;
+
+  /**
    * 예측점수
    */
-  @ApiModelProperty(required = true, notes = "예측점수", position = 12)
-  private int qtyPred;
+  @ApiModelProperty(required = true, notes = "예측점수", position = 15)
+  private int predScore;
+
+  /**
+   * 입력순위
+   */
+  @ApiModelProperty(required = true, notes = "입력순위", position = 16)
+  private Long inputRank;
+
+  /**
+   * 입력점수
+   */
+  @ApiModelProperty(required = true, notes = "입력점수", position = 17)
+  private Long inputScore;
+
+  /**
+   * 입력총점수
+   */
+  @ApiModelProperty(required = true, notes = "입력총점수", position = 18)
+  private Long inputWholeScore;
 }
