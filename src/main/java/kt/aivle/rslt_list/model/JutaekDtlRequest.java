@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class JutaekDtlRequest extends BaseModel {
+public class JutaekDtlRequest {
   private static final long serialVersionUID = 1L;
 
   /**
