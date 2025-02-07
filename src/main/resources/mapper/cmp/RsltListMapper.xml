@@ -136,7 +136,9 @@
     </choose>
     j.jutaek_name,
     j.jutaek_address,
-    jd.qty_pred
+    jd.qty_pred,
+    j.infra_score,
+    jd.structure_score
     FROM jutaek_dtl AS jd
     LEFT JOIN jutaek AS j
     ON j.jutaek_sn = jd.jutaek_sn
