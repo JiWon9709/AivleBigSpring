@@ -132,7 +132,8 @@
       </otherwise>
     </choose>
     j.jutaek_name,
-    j.jutaek_address
+    j.jutaek_address,
+    jd.qty_pred
     FROM jutaek_dtl AS jd
     LEFT JOIN jutaek AS j
     ON j.jutaek_sn = jd.jutaek_sn
