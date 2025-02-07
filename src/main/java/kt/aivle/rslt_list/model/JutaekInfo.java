@@ -119,4 +119,10 @@ public class JutaekInfo {
    */
   @ApiModelProperty(required = true, notes = "입력점수", position = 17)
   private Long inputScore;
+
+  /**
+   * 입력총점수
+   */
+  @ApiModelProperty(required = true, notes = "입력총점수", position = 18)
+  private Long inputWholeScore;
 }
