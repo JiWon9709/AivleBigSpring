@@ -81,6 +81,8 @@ public class RsltListService {
       } else {
         List<JutaekInfo> infoList = rsltListMapper.getJutaekList(jutaekListRequest);
         for (int i = 0; i < infoList.size(); i++) {
+          infoList.get(i).setInputRank(jutaekListRequest.getInputRank());
+          infoList.get(i).setInputScore(jutaekListRequest.getInputScore());
           //사진정보 넣기
           List<String> jutaekImgInfo = rsltListMapper.getJutaekImg(infoList.get(i).getJutaekDtlSn());
           if (jutaekImgInfo != null && jutaekImgInfo.size() > 0) {
