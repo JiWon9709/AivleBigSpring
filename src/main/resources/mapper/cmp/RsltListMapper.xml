@@ -136,9 +136,7 @@
     </choose>
     j.jutaek_name,
     j.jutaek_address,
-    jd.qty_pred,
-    j.infra_score,
-    jd.structure_score
+    jd.qty_pred
     FROM jutaek_dtl AS jd
     LEFT JOIN jutaek AS j
     ON j.jutaek_sn = jd.jutaek_sn
@@ -170,6 +168,8 @@
     , j.jutaek_address
     , j.longitude
     , j.latitude
+    , j.infra_score
+    , jd.structure_score
     <choose>
       <when test="inputRank == 1">
         , jd.a_guarantee AS guarantee
