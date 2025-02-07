@@ -125,4 +125,16 @@ public class JutaekInfo {
    */
   @ApiModelProperty(required = true, notes = "입력총점수", position = 18)
   private Long inputWholeScore;
+
+  /**
+   * 인프라점수
+   */
+  @ApiModelProperty(required = true, notes = "인프라점수", position = 19)
+  private Long infraScore;
+
+  /**
+   * 구조점수
+   */
+  @ApiModelProperty(required = true, notes = "구조점수", position = 20)
+  private Long structureScore;
 }
