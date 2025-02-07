@@ -99,6 +99,8 @@ public class RsltListService {
             } else {
               infoList.get(i).setFavYn("N");
             }
+          } else {
+            infoList.get(i).setFavYn("N");
           }
           //예측점수 순위로 변경
           int qtyPred = infoList.get(i).getQtyPred();
