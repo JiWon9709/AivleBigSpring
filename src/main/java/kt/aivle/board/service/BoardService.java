@@ -29,7 +29,7 @@ public class BoardService {
     @Autowired
     private BoardMapper boardMapper;
     private static final String FTP_UPLOAD_DIR = "/uploads/board/";
-    private static final String FTP_URL_PREFIX = "http://4.217.186.166:8081/uploads/img/";
+    private static final String FTP_URL_PREFIX = "http://4.217.186.166:8081/uploads/";
 
     @Value("${file.path}")
     private String dir;
@@ -84,7 +84,7 @@ public class BoardService {
         ImgEntity imgEntity = new ImgEntity();
         imgEntity.setRefTable(refTable);
         imgEntity.setRefSn(refSn);
-        imgEntity.setPath(FTP_URL_PREFIX);
+        imgEntity.setPath(FTP_URL_PREFIX + "img/");
         imgEntity.setFileName(uniqueFileName);
         imgEntity.setOriFileName(originalFilename);
         imgEntity.setExt(ext);
@@ -125,5 +125,45 @@ public class BoardService {
         boardMapper.updatePost(board);
     }
 
+    public void saveGongo(Gongo gongo) {
+        log.info("게시글 저장 요청: {}", gongo);
+        boardMapper.saveGongo(gongo);
+    }
 
+    // pdffile
+    public PdfFileEntity getPdfFileById(int id) {
+        return boardMapper.getPdfFileById(id);
+    }
+
+    @Transactional
+    public void uploadAndSavePdf(String refTable, int refSn, MultipartFile pdfFile) throws IOException {
+        // 파일 이름 및 확장자 생성
+        String uploadFolder = dir + "pdf";
+        String originalFilename = pdfFile.getOriginalFilename();
+//        String ext = originalFilename.substring(originalFilename.lastIndexOf('.') + 1);
+        String uniqueFileName = UUID.randomUUID().toString() + ".pdf";
+
+        // 디렉터리 생성 체크
+        File directory = new File(uploadFolder);
+        if (!directory.exists()) {
+            directory.mkdirs(); // 디렉터리 없으면 생성
+        }
+        // DB 저장
+        PdfFileEntity pdf = new PdfFileEntity();
+        pdf.setRefTable(refTable);
+        pdf.setRefSn(refSn);
+        pdf.setPath(FTP_URL_PREFIX +"pdf/");
+        pdf.setFileName(uniqueFileName);
+        pdf.setOriFileName(originalFilename);
+
+        boardMapper.regPdf(pdf);
+        // FTP 업로드
+        try {
+            File saveFile = new File(uploadFolder, uniqueFileName);
+            pdfFile.transferTo(saveFile);
+        } catch (Exception e) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("pdf를 서버에 저장 중 에러가 발생하였습니다.");
+        }
+
+    }
 }

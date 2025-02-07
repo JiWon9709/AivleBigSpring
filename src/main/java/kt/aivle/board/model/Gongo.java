@@ -13,7 +13,8 @@ public class Gongo {
     private String gongoName;
     @ApiModelProperty(notes="공고타입")
     private int gongoType;
-
+    @ApiModelProperty(notes="내용")
+    private String content;
     @ApiModelProperty(notes = "시작일")
     private String scheduleStartDt;
     @ApiModelProperty(notes = "종료일")
