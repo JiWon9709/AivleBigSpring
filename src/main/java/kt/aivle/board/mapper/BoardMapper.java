@@ -1,11 +1,7 @@
 package kt.aivle.board.mapper;
 
 import kt.aivle.base.config.mapper.DATA_SOURCE;
-import kt.aivle.board.model.Board;
-import kt.aivle.board.model.BoardListResponse;
-import kt.aivle.board.model.BoardRequest;
-import kt.aivle.board.model.Gongo;
-import kt.aivle.board.model.ImgEntity;
+import kt.aivle.board.model.*;
 
 import java.util.List;
 
@@ -21,4 +17,8 @@ public interface BoardMapper {
     public void softDeleteImg(int boardSn);
     public void deleteImage(int imgSn);
     public void updatePost(Board board);
+
+    public PdfFileEntity getPdfFileById(int id);
+    public void saveGongo(Gongo gongo);
+    public int regPdf(PdfFileEntity pdfEntity);
 }
