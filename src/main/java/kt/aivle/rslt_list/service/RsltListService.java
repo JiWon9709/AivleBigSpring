@@ -59,6 +59,23 @@ public class RsltListService {
       result.setResultCode(BaseMsg.FAILED.getCode());
     }
 
+    Long rank  = jutaekListRequest.getInputRank();   // 1, 2, or 3
+    Long score = jutaekListRequest.getInputScore();  // depends on the rank
+    Long predScore = 0L; // default or sentinel value
+    if (rank != null) {
+      if (rank == 1) {
+        // rank=1 => predScore = 22 + score
+        predScore = 22 + score;
+      } else if (rank == 2) {
+        // rank=2 => predScore = 11 + score
+        predScore = 11 + score;
+      } else if (rank == 3) {
+        // rank=3 => predScore = score
+        predScore = score;
+      }
+    }
+    jutaekListRequest.setQtyPred(predScore);
+
     // 공고 sn으로 해당하는 공고 dtl sn들을 받기
     List<Integer> dtlSnList = rsltListMapper.getDtlSnByGongoSn(jutaekListRequest.getGongoSn());
     if (dtlSnList.size() == 0) {
@@ -83,6 +100,7 @@ public class RsltListService {
         for (int i = 0; i < infoList.size(); i++) {
           infoList.get(i).setInputRank(jutaekListRequest.getInputRank());
           infoList.get(i).setInputScore(jutaekListRequest.getInputScore());
+          infoList.get(i).setInputWholeScore(predScore);
           //사진정보 넣기
           List<String> jutaekImgInfo = rsltListMapper.getJutaekImg(infoList.get(i).getJutaekDtlSn());
           if (jutaekImgInfo != null && jutaekImgInfo.size() > 0) {
@@ -108,10 +126,10 @@ public class RsltListService {
           int qtyPred = infoList.get(i).getQtyPred();
           if (qtyPred >= 22 && qtyPred <= 32) {
             infoList.get(i).setPredRank(1);
-            infoList.get(i).setPredScore(qtyPred - 21);
+            infoList.get(i).setPredScore(qtyPred - 22);
           } else if (qtyPred >= 11 && qtyPred <= 21) {
             infoList.get(i).setPredRank(2);
-            infoList.get(i).setPredScore(qtyPred - 10);
+            infoList.get(i).setPredScore(qtyPred - 11);
           } else if (qtyPred >= 0 && qtyPred <= 10) {
             infoList.get(i).setPredRank(3);
             infoList.get(i).setPredScore(qtyPred);
@@ -134,8 +152,19 @@ public class RsltListService {
   @Transactional
   public BaseResModel<JutaekDtlInfo> jutaekDtl(JutaekDtlRequest jutaekDtlRequest) {
     BaseResModel<JutaekDtlInfo> result = new BaseResModel();
+    JutaekListRequest jutaekListRequest = new JutaekListRequest();
+    jutaekListRequest.setGongoSn(jutaekDtlRequest.getGongoSn());
+    jutaekListRequest.setUserSn(jutaekDtlRequest.getUserSn());
+    Long inputSn = rsltListMapper.getActiveInputSn(jutaekListRequest);
+    if (inputSn > 0) {
+      InputInfo inputInfo = rsltListMapper.getInputInfo(inputSn);
+      jutaekDtlRequest.setInputRank(inputInfo.getInputRank());
+    } else {
+      result.setResultMsg(BaseMsg.FAILED.getValue());
+      result.setResultCode(BaseMsg.FAILED.getCode());
+    }
     try {
-      JutaekDtlInfo info = rsltListMapper.getJutaekDtl(jutaekDtlRequest.getJutaekDtlSn());
+      JutaekDtlInfo info = rsltListMapper.getJutaekDtl(jutaekDtlRequest);
       if (info.getJutaekSn() > 0) {
         result.setData(info);
       } else {

@@ -108,6 +108,9 @@
     </foreach>
     )
     <include refid="getJutaekList" />
+    <if test="qtyPred != null">
+      ORDER BY ABS(CAST(jd.qty_pred AS SIGNED) - #{qtyPred})
+    </if>
   </select>
 
   <!-- 주택 sn으로 주택 리스트 찾기 -->
@@ -142,6 +145,7 @@
       #{item}
     </foreach>
     )
+    <include refid="getJutaekList" />
     <if test="qtyPred != null">
       ORDER BY ABS(CAST(jd.qty_pred AS SIGNED) - #{qtyPred})
     </if>
@@ -164,6 +168,16 @@
     , j.jutaek_address
     , j.longitude
     , j.latitude
+    <choose>
+      <when test="inputRank == 1">
+        , jd.a_guarantee AS guarantee
+        , jd.a_monthly AS monthly
+      </when>
+      <otherwise>
+        , jd.b_guarantee AS guarantee
+        , jd.b_monthly AS monthly
+      </otherwise>
+    </choose>
     FROM jutaek_dtl AS jd
     LEFT JOIN jutaek AS j ON j.jutaek_sn = jd.jutaek_sn
     WHERE jd.jutaek_dtl_sn = #{jutaekDtlSn}
