@@ -110,9 +110,14 @@ public class BoardService {
         boardMapper.softDeletePost(boardSn);
     }
 
-    // 소프트이미지 삭제
+    // boardSn 소프트이미지 삭제
     public void softDeleteImg(int boardSn) {
         boardMapper.softDeleteImg(boardSn);
+    }
+
+    // 이미지Sn으로 이미지 삭제
+    public void deleteImage(int imgSn) {
+        boardMapper.deleteImage(imgSn);
     }
 
     // 게시글 수정

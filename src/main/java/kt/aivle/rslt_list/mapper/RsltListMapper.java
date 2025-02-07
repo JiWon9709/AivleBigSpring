@@ -58,10 +58,10 @@ public interface RsltListMapper {
   /**
    * 주택 상세정보 조회
    *
-   * @param jutaekDtlSn
+   * @param jutaekDtlRequest
    * @return
    */
-  public JutaekDtlInfo getJutaekDtl(Long jutaekDtlSn);
+  public JutaekDtlInfo getJutaekDtl(JutaekDtlRequest jutaekDtlRequest);
 
   /**
    * 이미지 서버 등록
