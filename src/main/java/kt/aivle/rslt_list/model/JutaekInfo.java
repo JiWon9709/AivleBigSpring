@@ -107,4 +107,16 @@ public class JutaekInfo {
    */
   @ApiModelProperty(required = true, notes = "예측점수", position = 15)
   private int predScore;
+
+  /**
+   * 입력순위
+   */
+  @ApiModelProperty(required = true, notes = "입력순위", position = 16)
+  private Long inputRank;
+
+  /**
+   * 입력점수
+   */
+  @ApiModelProperty(required = true, notes = "입력점수", position = 17)
+  private Long inputScore;
 }
