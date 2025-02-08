@@ -21,4 +21,6 @@ public interface BoardMapper {
     public PdfFileEntity getPdfFileById(int id);
     public void saveGongo(Gongo gongo);
     public int regPdf(PdfFileEntity pdfEntity);
+    public Gongo getPostByGongoSn(int gongoSn);
+    public List<PdfFileEntity> findPdfsByGongoSn(int gongoSn);
 }

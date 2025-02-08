@@ -10,13 +10,16 @@ import kt.aivle.member.service.RefreshTokenService;
 import kt.aivle.member.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -196,24 +199,24 @@ public class BoardController {
 //        return ResponseEntity.ok(pdfFiles);
 //    }
 
-//    @ApiOperation(value = "공고게시글 상세 조회")
-//    @GetMapping("/gongoboard/detail")
-//    public ResponseEntity<Map<String, Object>> getGongoDetail(@RequestParam("gongoSn") int gongoSn, @RequestParam("userSn") int userSn) {
-//        try {
-//            Gongo gongo = boardService.getPostByGongoSn(gongoSn);
-//            List<PdfFileEntity> pdfs = boardService.getPdfsByBoardSn(gongoSn);
-////            boolean isOwner = (gongo.getUserSn() == userSn); // 본인 여부 확인
-//
-//            Map<String, Object> response = new HashMap<>();
-//            response.put("gongo", gongo);
-////            response.put("isOwner", isOwner);
-//            response.put("pdfs", pdfs);
-//
-//            return ResponseEntity.ok(response);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-//        }
-//    }
+    @ApiOperation(value = "공고게시글 상세 조회")
+    @GetMapping("/gongoboard/detail") // @RequestParam("userSn") int userSn 관리자 추가할거 생각.
+    public ResponseEntity<Map<String, Object>> getGongoDetail(@RequestParam("gongoSn") int gongoSn) {
+        try {
+            Gongo gongo = boardService.getPostByGongoSn(gongoSn);
+            List<PdfFileEntity> pdfs = boardService.getPdfsByGongoSn(gongoSn);
+//            boolean isOwner = (gongo.getUserSn() == userSn); // 본인 여부 확인
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("gongo", gongo);
+//            response.put("isOwner", isOwner);
+            response.put("pdfs", pdfs);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
     @ApiOperation(value="공고게시글 올리기")
     @PostMapping("/post-gongoboard")
@@ -254,32 +257,34 @@ public class BoardController {
 
     @ApiOperation(value = "게시글 PDF 다운로드")
     @GetMapping("/gongoboard/pdf/download/{pdf_sn}")
-    public void downloadPdf(@PathVariable int pdf_sn, HttpServletResponse response) {
+    public ResponseEntity<byte[]> downloadPdf(@PathVariable int pdf_sn) {
         try {
             PdfFileEntity pdfFile = boardService.getPdfFileById(pdf_sn);
             if (pdfFile == null) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                response.getWriter().write("파일을 찾을 수 없습니다.");
-                return;
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("파일을 찾을 수 없습니다.".getBytes(StandardCharsets.UTF_8));
             }
 
-            Path filePath = Paths.get(pdfFile.getPath());
-            if (Files.notExists(filePath)) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                response.getWriter().write("파일이 존재하지 않습니다.");
-                return;
-            }
+            // URL에서 파일 읽기
+            String fileUrl = pdfFile.getPath(); // "http://4.217.186.166:8081/uploads/pdf/..."
+            URL url = new URL(fileUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
 
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=\"" + pdfFile.getOriFileName()+ "\"");
-            Files.copy(filePath, response.getOutputStream());
-            response.getOutputStream().flush();
+            // 파일 데이터 읽기
+            InputStream inputStream = connection.getInputStream();
+            byte[] fileContent = inputStream.readAllBytes();
+            inputStream.close();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.attachment().filename(pdfFile.getOriFileName()).build());
+            return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+
         } catch (Exception e) {
             e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("서버 오류로 인해 파일을 다운로드할 수 없습니다.".getBytes(StandardCharsets.UTF_8));
         }
     }
-
-
-
 }
