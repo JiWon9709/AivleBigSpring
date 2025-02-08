@@ -125,6 +125,7 @@ public class BoardService {
         boardMapper.updatePost(board);
     }
 
+    // 공고게시글 저장
     public void saveGongo(Gongo gongo) {
         log.info("게시글 저장 요청: {}", gongo);
         boardMapper.saveGongo(gongo);
@@ -165,5 +166,15 @@ public class BoardService {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("pdf를 서버에 저장 중 에러가 발생하였습니다.");
         }
 
+    }
+
+    // 공고게시글 상세조회
+    public Gongo getPostByGongoSn(int gongoSn) {
+        return boardMapper.getPostByGongoSn(gongoSn);
+    }
+
+    // 공고게시글의 pdf 불러오기
+    public List<PdfFileEntity> getPdfsByGongoSn(int gongoSn) {
+        return boardMapper.findPdfsByGongoSn(gongoSn);
     }
 }
