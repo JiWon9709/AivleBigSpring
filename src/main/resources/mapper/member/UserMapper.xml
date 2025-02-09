@@ -19,10 +19,12 @@
     <!-- 이메일로 사용자 정보 조회 -->
     <select id="findByEmail" parameterType="String" resultType="kt.aivle.member.model.UserResponse">
         /* UserMapper.findByEmail */
-        SELECT email, user_sn, use_yn, role
+        SELECT email, user_sn, use_yn, role, withdrawal_dt
         FROM user
         WHERE email = #{email}
-        AND use_yn = 'Y'
+        AND (use_yn = 'Y'
+            OR (use_yn = 'N'
+                AND withdrawal_dt >= DATE_SUB(NOW(), INTERVAL 30 DAY)))
     </select>
 
     <!-- 인증용 사용자 정보 조회 -->
