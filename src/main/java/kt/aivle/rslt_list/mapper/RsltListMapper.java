@@ -1,6 +1,7 @@
 package kt.aivle.rslt_list.mapper;
 
 import kt.aivle.base.config.mapper.DATA_SOURCE;
+import kt.aivle.board.model.PdfFileEntity;
 import kt.aivle.clnt_co.model.TestList;
 import kt.aivle.rslt_list.model.*;
 
@@ -110,4 +111,6 @@ public interface RsltListMapper {
    * @return
    */
   public String getFavYn(Long favoriteSn);
+
+  public String getPdfFileById(Long pdfSn);
 }

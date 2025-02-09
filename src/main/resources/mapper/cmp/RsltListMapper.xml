@@ -287,4 +287,12 @@
     END
     WHERE favorite_sn = #{favoriteSn}
   </update>
+
+  <!-- pdf db 불러오기-->
+  <select id="getPdfFileById" resultType="String">
+    SELECT
+    CONCAT(path, file_name) AS result
+    FROM pdf
+    WHERE ref_table = 'gongo' AND pdf_sn = #{pdfSn} AND use_yn = 'Y'
+  </select>
 </mapper>
