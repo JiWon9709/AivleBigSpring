@@ -17,123 +17,26 @@ public class MyPageService {
     private MyPageMapper myPageMapper;
 
     /**
-     * 사용자정보 가져오기
-     *
-     * @param userSn
-     * @return
-     */
-    @Transactional
-    public UserInfoResponse getuserInfo(int userSn) {
-        UserInfoResponse result = new UserInfoResponse();
-
-        try {
-            UserInfo userinfo = myPageMapper.getUserInfo(userSn);
-            result.setUserName(userinfo.getUserName());
-            result.setEmail(userinfo.getEmail());
-            result.setPassword(userinfo.getPassword());
-            result.setGender(userinfo.getGender());
-            result.setAddress(userinfo.getAddress());
-            result.setZipCode(userinfo.getZipCode());
-            result.setTelno(userinfo.getTelno());
-        } catch (Exception e) {
-            throw new RuntimeException("리스트를 불러오던 중 에러가 발생했습니다." + e);
-        }
-        return result;
-    }
-
-    /**
-     * 사용자정보 수정하기
-     *
-     * @param userinfo
-     * @return
-     */
-    @Transactional
-    public void updateUser(UserInfo userinfo) {
-        UserInfo existingUser = myPageMapper.getUserInfo(userinfo.getUserSn());
-
-        try {
-            // 사용자 정보 업데이트
-            existingUser.setUserSn(userinfo.getUserSn());
-            existingUser.setUserName(userinfo.getUserName());
-            existingUser.setEmail(userinfo.getEmail());
-            existingUser.setPassword(userinfo.getPassword()); // 주의: 비밀번호는 해싱해야 함
-            existingUser.setGender(userinfo.getGender());
-            existingUser.setAddress(userinfo.getAddress());
-            existingUser.setZipCode(userinfo.getZipCode());
-            existingUser.setTelno(userinfo.getTelno());
-
-            // 업데이트된 사용자 정보 저장
-            myPageMapper.updateUserInfo(existingUser);
-        } catch (Exception e) {
-            throw new RuntimeException("리스트를 불러오던 중 에러가 발생했습니다." + e);
-        }
-    }
-
-    public boolean checkPassword(UserPwRequest userPwRequest) {
-        UserPwRequest pwRequest = new UserPwRequest();
-        try {
-            pwRequest.setUserSn(userPwRequest.getUserSn());
-            pwRequest.setCurrentPassword(userPwRequest.getCurrentPassword()); // 주의: 비밀번호는 해싱해야 함
-            int validPassword = myPageMapper.verifyPassword(pwRequest);
-
-            if (validPassword == 0) {
-                // 현재 비밀번호가 일치하지 않음
-                return false;
-            }
-            else {
-                return true;
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * 비밀번호변경
-     *
-     * @param userPwRequest
-     * @return
-     */
-    @Transactional
-    public boolean updatePw(UserPwRequest userPwRequest) {
-        // 1. 비밀번호 검증
-        UserPwRequest pwRequest = new UserPwRequest();
-        try {
-            pwRequest.setUserSn(userPwRequest.getUserSn());
-            pwRequest.setCurrentPassword(userPwRequest.getCurrentPassword()); // 주의: 비밀번호는 해싱해야 함
-            int validPassword = myPageMapper.verifyPassword(pwRequest);
-
-            if (validPassword == 0) {
-                // 현재 비밀번호가 일치하지 않음
-                return false;
-            }
-            // 2. 비밀번호 업데이트
-            pwRequest.setNewPassword(userPwRequest.getNewPassword());
-            int updatedRows = myPageMapper.updatePw(pwRequest);
-            return updatedRows > 0; // 업데이트 성공 여부 반환
-        } catch (Exception e) {
-            throw new RuntimeException("비밀번호 업데이트 중 에러가 발생했습니다." + e);
-        }
-    }
-
-    /**
      * 관심주택정보 가져오기
      *
      * @param userSn
      * @return List<FavoriteResponse>
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public FavoriteListResponse getuserFavorite(int userSn) {
-        FavoriteListResponse response = new FavoriteListResponse();
 
+        log.info("Fetching favorites for user: {}", userSn);
         try {
             // 사용자번호가 있는 관심 주택리스트 받기
             List<FavoriteResponse> favoriteList = myPageMapper.getUserFavorite(userSn);
+            FavoriteListResponse response = new FavoriteListResponse();
             response.setFavoriteResponseList(favoriteList);
+            return response;
         } catch (Exception e) {
-            throw new RuntimeException("리스트를 불러오던 중 에러가 발생했습니다." + e);
+            log.error("Error fetching favorites for user: " + userSn, e);
+            throw new RuntimeException("Failed to fetch favorites: " + e.getMessage(), e);
+
         }
-        return response;
     }
 
     public boolean deleteFavorite(int favoriteSn) {
