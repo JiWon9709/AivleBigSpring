@@ -157,7 +157,7 @@ public class UserMypageController {
 
 
     @ApiOperation(value = "프로필 사진 삭제")
-    @DeleteMapping("/users/profile-image")
+    @DeleteMapping("/delete-profile")
     public ResponseEntity<Map<String, Object>> deleteProfileImage(@RequestParam("userSn") Long userSn) {
         try {
             userMypageService.deleteProfileImage(userSn);
