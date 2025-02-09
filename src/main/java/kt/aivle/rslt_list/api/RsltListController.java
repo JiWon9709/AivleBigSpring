@@ -9,8 +9,10 @@ import kt.aivle.rslt_list.model.*;
 import kt.aivle.rslt_list.service.RsltListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @RestController
@@ -87,5 +89,16 @@ public class RsltListController {
       response.setResultCode(BaseMsg.FAILED.getCode());
     }
     return response;
+  }
+
+  @ApiOperation(value = "file.1 파일다운로드", notes = "파일다운로드", response = BaseResModel.class)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResModel.class)})
+  @RequestMapping(value = "/v1/download",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<byte[]> FileList(@RequestBody JutaekDtlRequest downloadRequest) throws UnsupportedEncodingException {
+    ResponseEntity<byte[]> data = rsltListService.download(downloadRequest);
+    return data;
   }
 }
