@@ -48,7 +48,7 @@ public class BoardController {
     private BoardService boardService;
 
     @ApiOperation(value="게시글 리스트")
-    @GetMapping("/board")
+    @GetMapping("/userboard")
     public BoardListResponse getListBoard(){
         BoardListResponse boardlist = new BoardListResponse();
         try {
@@ -72,7 +72,7 @@ public class BoardController {
     }
 
     @ApiOperation(value="게시글 올리기")
-    @PostMapping("/post-board")
+    @PostMapping("/post-userboard")
     public ResponseEntity<String> createPost(@RequestParam("title") String title,
                                              @RequestParam("content") String content,
                                              @RequestParam("userSn") int userSn,
@@ -116,7 +116,7 @@ public class BoardController {
     }
 
     @ApiOperation(value = "게시글 상세 조회")
-    @GetMapping("/board/detail")
+    @GetMapping("/userboard/detail")
     public ResponseEntity<Map<String, Object>> getPostDetail(@RequestParam("boardSn") int boardSn, @RequestParam("userSn") int userSn) {
         try {
             Board post = boardService.getPostByBoardSn(boardSn);
@@ -135,7 +135,7 @@ public class BoardController {
     }
 
     @ApiOperation(value = "게시글 소프트 삭제")
-    @PutMapping("/board/{boardSn}")
+    @PutMapping("/userboard/{boardSn}")
     public ResponseEntity<String> softDeletePost(@PathVariable int boardSn, @RequestParam int userSn) {
         try {
             Board post = boardService.getPostByBoardSn(boardSn);
@@ -155,7 +155,7 @@ public class BoardController {
     }
 
     @ApiOperation(value = "게시글 수정")
-    @PostMapping("/board")
+    @PostMapping("/userboard")
     @Transactional
     public ResponseEntity<String> updatePost(@RequestParam(value = "boardSn", required = false) String strboardSn,
                                              @RequestParam("title") String title,
@@ -320,159 +320,4 @@ public class BoardController {
                 .body(resource);
     }
 
-//    @GetMapping("/gongoboard/pdf/download/{pdfSn}")
-//    public ResponseEntity<byte[]> getPdfInfo(@PathVariable("pdfSn") int pdfSn) {
-//        PdfFileEntity pdfFile = boardService.getPdfFileById(pdfSn);
-//        if (pdfFile == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//        }
-//
-//        // 외부 URL 가져오기 (pdfFile.getUrl()은 외부 URL이어야 함)
-//        String fileUrl = pdfFile.getPath() + pdfFile.getFileName();
-//        // 예: "http://4.217.186.166:8081/uploads/pdf/파일명.pdf"
-//
-//        try {
-//            URL url = new URL(fileUrl);
-//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//            connection.setRequestMethod("GET");
-//            connection.setConnectTimeout(5000);  // 타임아웃 설정
-//            connection.setReadTimeout(5000);  // 읽기 타임아웃 설정
-//
-//            // 파일을 byte 배열로 읽기
-//            try (InputStream inputStream = connection.getInputStream();
-//                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-//
-//                byte[] buffer = new byte[1024];
-//                int bytesRead;
-//                while ((bytesRead = inputStream.read(buffer)) != -1) {
-//                    byteArrayOutputStream.write(buffer, 0, bytesRead);
-//                }
-//
-//                byte[] fileBytes = byteArrayOutputStream.toByteArray();
-//                // 파일 다운로드 헤더 설정
-//                HttpHeaders headers = new HttpHeaders();
-//                headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=*=UTF-8''" + URLEncoder.encode(pdfFile.getFileName(), StandardCharsets.UTF_8));
-//                headers.setContentLength(fileBytes.length);
-//
-//                return ResponseEntity.ok()
-//                        .headers(headers)
-////                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-//                        .body(fileBytes);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//        }
-//    }
-
-//    @ApiOperation(value = "게시글 PDF 다운로드")
-//    @GetMapping("/gongoboard/pdf/download/{pdf_sn}")
-//    public ResponseEntity<byte[]> download(@PathVariable int pdf_sn) {
-//        PdfFileEntity pdfFile = boardService.getPdfFileById(pdf_sn);
-//        if (pdfFile == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-//        }
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        String fileUrl = pdfFile.getPath() + pdfFile.getFileName();
-//
-//        try {
-//            // HTTP 연결을 통해 파일 다운로드
-//            URL url = new URL(fileUrl);
-//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//            connection.setRequestMethod("GET");
-//
-//            byte[] data;
-//            try (InputStream inputStream = connection.getInputStream()) {
-//                data = inputStream.readAllBytes();
-//            }
-//
-//            String encodedFileName = URLEncoder.encode(pdfFile.getOriFileName(), StandardCharsets.UTF_8.name());
-//            headers.setContentDisposition(ContentDisposition.attachment().filename(encodedFileName).build());
-//            headers.setContentType(MediaType.APPLICATION_PDF);
-//
-//            return ResponseEntity.ok()
-//                    .headers(headers)
-//                    .body(data);
-//
-//        } catch (IOException ex) {
-//            ex.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//        }
-//    }
-
-
-//    @ApiOperation(value = "게시글 PDF 다운로드")
-//    @GetMapping("/gongoboard/pdf/download/{pdf_sn}")
-//    public ResponseEntity<byte[]> download(@PathVariable int pdf_sn) {
-//        PdfFileEntity pdfFile = boardService.getPdfFileById(pdf_sn);
-//        if (pdfFile == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-//        }
-//        HttpHeaders headers = new HttpHeaders();
-//        String fileUrl = pdfFile.getPath() + pdfFile.getFileName();
-//        URL url = new URL(fileUrl);
-//        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//        connection.setRequestMethod("GET");
-//
-//        Path fileStorageLocation = Paths.get(pdfFile.getPath());
-//        try {
-//            Path filePath = fileStorageLocation.resolve(pdfFile.getFileName()).normalize();
-//            Resource resource = new UrlResource(filePath.toUri());
-//
-//            if (!resource.exists()) {
-//                // Log error and return 404 status
-//                return ResponseEntity.notFound().build();
-//            }
-//
-//            byte[] data = Files.readAllBytes(filePath);
-//            String encodedFileName = URLEncoder.encode(pdfFile.getFileName(), StandardCharsets.UTF_8.name());
-//            headers.setContentDispositionFormData("attachment", URLEncoder.encode(encodedFileName, "UTF-8"));
-//
-//            return ResponseEntity.ok()
-//                    .headers(headers)
-//                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-//                    .body(data);
-//
-//        } catch (IOException ex) {
-//            // Log the exception and return a server error status for IOException
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//        } catch (Exception ex) {
-//            // Log the exception and return a server error status for other Exceptions
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//        }
-//    }
-  
-//    @ApiOperation(value = "게시글 PDF 다운로드")
-//    @GetMapping("/gongoboard/pdf/download/{pdf_sn}")
-//    public ResponseEntity<byte[]> downloadPdf(@PathVariable int pdf_sn) {
-//        try {
-//            PdfFileEntity pdfFile = boardService.getPdfFileById(pdf_sn);
-//            if (pdfFile == null) {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body("파일을 찾을 수 없습니다.".getBytes(StandardCharsets.UTF_8));
-//            }
-//
-//            // URL에서 파일 읽기
-//            String fileUrl = pdfFile.getPath(); // "http://4.217.186.166:8081/uploads/pdf/..."
-//            URL url = new URL(fileUrl);
-//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//            connection.setRequestMethod("GET");
-//
-//            // 파일 데이터 읽기
-//            InputStream inputStream = connection.getInputStream();
-//            byte[] fileContent = inputStream.readAllBytes();
-//            inputStream.close();
-//
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.APPLICATION_PDF);
-//            headers.setContentDisposition(ContentDisposition.attachment().filename(pdfFile.getOriFileName()).build());
-//            return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("서버 오류로 인해 파일을 다운로드할 수 없습니다.".getBytes(StandardCharsets.UTF_8));
-//        }
-//    }
 }
