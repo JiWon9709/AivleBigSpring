@@ -2,6 +2,8 @@ package kt.aivle.member.model;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class UserResponse {
     private Integer userSn;
@@ -14,4 +16,5 @@ public class UserResponse {
     private String address;
     private String telno;
     private String useYn;
+    private LocalDateTime withdrawalDt; // 탈퇴 날짜
 }
