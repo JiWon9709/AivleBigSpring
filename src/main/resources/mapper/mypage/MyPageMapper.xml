@@ -51,25 +51,41 @@
     </update>
 
     <!-- 관심주택불러오기 -->
-    <select id="getUserFavorite"
-            resultType="kt.aivle.mypage.model.FavoriteResponse">
-        SELECT
+    <select id="getUserFavorite" resultType="kt.aivle.mypage.model.FavoriteResponse">
+        SELECT DISTINCT
         j.jutaek_name AS jutaekName,
         jd.jutaek_size AS jutaekSize,
         j.jutaek_address AS jutaekAddress,
         gd.gongo_type AS gongoType,
-        f.favorite_sn AS favoriteSn
-        FROM
-        favorite f
-        JOIN
-        jutaek_dtl jd ON f.jutaek_dtl_sn = jd.jutaek_dtl_sn
-        JOIN
-        jutaek j ON jd.jutaek_sn = j.jutaek_sn
-        LEFT JOIN
-        gongo_dtl gd ON f.gongo_sn = gd.gongo_sn
-        WHERE
-        f.user_sn = #{userSn}
+        f.favorite_sn AS favoriteSn,
+        jd.jutaek_dtl_sn,
+        jd.structure_score,
+        j.infra_score,
+        j.longitude,
+        j.latitude,
+        CASE
+        WHEN gd.gongo_type = '1' THEN jd.a_guarantee
+        ELSE jd.b_guarantee
+        END AS guarantee,
+        CASE
+        WHEN gd.gongo_type = '1' THEN jd.a_monthly
+        ELSE jd.b_monthly
+        END AS monthly,
+        (
+        SELECT JSON_ARRAYAGG(CONCAT(i.path, i.file_name))
+        FROM img i
+        WHERE i.ref_sn = j.jutaek_sn
+        AND i.ref_table = 'jutaek'
+        ) AS jutaekImg
+        FROM favorite f
+        JOIN jutaek_dtl jd ON f.jutaek_dtl_sn = jd.jutaek_dtl_sn
+        JOIN jutaek j ON jd.jutaek_sn = j.jutaek_sn
+        LEFT JOIN gongo_dtl gd ON f.gongo_sn = gd.gongo_sn
+        WHERE f.user_sn = #{userSn}
+        AND f.use_yn = 'Y'
+        ORDER BY f.favorite_sn DESC
     </select>
+
 
     <!-- 관심주택 삭제 -->
     <delete id="deleteFavorite" parameterType="int">
@@ -77,9 +93,5 @@
         WHERE favorite_sn = #{favoriteSn}
     </delete>
 
-    <!-- 회원탈퇴 -->
-    <delete id="deleteUser" parameterType="int">
-        DELETE FROM user
-        WHERE user_sn = #{userSn}
-    </delete>
+
 </mapper>

@@ -7,8 +7,13 @@ import kt.aivle.member.service.UserMypageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -125,5 +130,43 @@ public class UserMypageController {
         }
         return result;
     }
+
+
+    @ApiOperation(value = "프로필 사진 업로드")
+    @PostMapping("/profile-image")
+    public ResponseEntity<Map<String, Object>> uploadProfileImage(
+            @RequestParam("userSn") Long userSn,
+            @RequestParam("profileImage") MultipartFile file) {
+        try {
+            // ✅ DTO 객체 생성하여 userSn 설정
+            UserProfileImageUpdateRequest request = new UserProfileImageUpdateRequest();
+            request.setUserSn(userSn);
+
+            // ✅ DTO 객체를 uploadProfileImage()에 전달
+            UserProfileImageResponse response = userMypageService.uploadProfileImage(request, file);
+            String imageUrl = response.getProfileImage();  // ✅ String 값 추출
+
+            return ResponseEntity.ok(Map.of("resultCode", 200, "data", Map.of("profileImage", imageUrl)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("resultCode", 400, "resultMsg", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("resultCode", 500, "resultMsg", "프로필 이미지 업로드 중 오류 발생"));
+        }
+    }
+
+
+    @ApiOperation(value = "프로필 사진 삭제")
+    @DeleteMapping("/users/profile-image")
+    public ResponseEntity<Map<String, Object>> deleteProfileImage(@RequestParam("userSn") Long userSn) {
+        try {
+            userMypageService.deleteProfileImage(userSn);
+            return ResponseEntity.ok(Map.of("resultCode", 200, "message", "프로필 이미지가 삭제되었습니다."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("resultCode", 500, "resultMsg", "프로필 이미지 삭제 중 오류가 발생했습니다."));
+        }
+    }
+
 
 }

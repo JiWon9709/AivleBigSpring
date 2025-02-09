@@ -5,7 +5,7 @@
 
     <select id="findBasicInfoByUserSn" parameterType="Long" resultType="kt.aivle.member.model.UserBasicInfoResponse">
         /* UserMypageMapper.findBasicInfoByUserSn */
-        SELECT user_sn, user_name, email
+        SELECT user_sn, user_name, email, profile_image
         FROM user
         WHERE user_sn = #{userSn}
         AND use_yn = 'Y'
@@ -57,6 +57,22 @@
             updated_dt = NOW()
         WHERE user_sn = #{userSn}
         AND use_yn = 'Y'
+    </update>
+
+    <update id="updateUserProfileImage">
+        UPDATE user
+        SET profile_image = #{profileImage}
+        WHERE user_sn = #{userSn}
+    </update>
+
+    <select id="getUserProfileImage" resultType="string">
+        SELECT profile_image FROM user WHERE user_sn = #{userSn}
+    </select>
+
+    <update id="deleteUserProfileImage">
+        UPDATE user
+        SET profile_image = NULL
+        WHERE user_sn = #{userSn}
     </update>
 
 </mapper>
