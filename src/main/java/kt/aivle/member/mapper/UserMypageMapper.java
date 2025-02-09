@@ -28,4 +28,15 @@ public interface UserMypageMapper {
     public int verifyPassword(UserPwRequest userPwRequest);
     public int updatePw(UserPwRequest userPwRequest); // 비밀번호 변경
     public void deleteUser(int usersn);
+
+    // 추가: 프로필 이미지 저장
+    int updateUserProfileImage(@Param("userSn") Long userSn, @Param("profileImage") String profileImage);
+
+    // 추가: 프로필 이미지 조회
+    String getUserProfileImage(@Param("userSn") Long userSn);
+
+    // 🔹 프로필 이미지 삭제 (NULL로 업데이트)
+    int deleteUserProfileImage(@Param("userSn") Long userSn);
+
+
 }

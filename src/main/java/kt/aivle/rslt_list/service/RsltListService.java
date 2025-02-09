@@ -10,13 +10,24 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -254,5 +265,47 @@ public class RsltListService {
     return result;
   }
 
+  public ResponseEntity<byte[]> download(JutaekDtlRequest downloadRequest) {
+    HttpHeaders headers = new HttpHeaders();
 
+    try {
+      // Retrieve the full file location (absolute or relative) from your mapper
+      String fileLocation = rsltListMapper.getPdfFileById(downloadRequest.getJutaekDtlSn());
+      if (fileLocation == null || fileLocation.trim().isEmpty()) {
+        // File location not found in the database
+        return ResponseEntity.notFound().build();
+      }
+
+      // Build and normalize the file path
+      Path filePath = Paths.get(fileLocation).normalize();
+
+      // Verify that the file exists
+      if (!Files.exists(filePath)) {
+        return ResponseEntity.notFound().build();
+      }
+
+      // Read the entire file into a byte array (consider streaming if the file is large)
+      byte[] fileData = Files.readAllBytes(filePath);
+
+      // Extract the file name and encode it for the HTTP header
+      String fileName = filePath.getFileName().toString();
+      String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.name());
+
+      // Prepare the headers: using RFC 5987 syntax to support non-ASCII file names
+      headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName);
+
+      // Return the file content with the appropriate headers and content type
+      return ResponseEntity.ok()
+          .headers(headers)
+          .contentType(MediaType.APPLICATION_OCTET_STREAM)
+          .body(fileData);
+
+    } catch (IOException ex) {
+      // Log the exception if necessary
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    } catch (Exception ex) {
+      // Log the exception if necessary
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+  }
 }
