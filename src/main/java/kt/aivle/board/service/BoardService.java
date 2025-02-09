@@ -29,7 +29,7 @@ public class BoardService {
     @Autowired
     private BoardMapper boardMapper;
     private static final String FTP_UPLOAD_DIR = "/uploads/board/";
-    private static final String FTP_URL_PREFIX = "http://4.217.186.166:8081/uploads/";
+    private static final String FTP_URL_PREFIX = "/app/data/uploads/";
 
     @Value("${file.path}")
     private String dir;

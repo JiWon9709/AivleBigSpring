@@ -102,7 +102,7 @@
             b.user_sn,
             title,
             content,
-            b.created_dt AS createdDt
+            DATE_FORMAT(b.created_dt, '%Y-%m-%d %H:%i') AS createdDt
         FROM
         board b
         JOIN

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.*;
 import org.springframework.http.*;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -149,13 +150,16 @@ public class BoardController {
 
     @ApiOperation(value = "게시글 수정")
     @PostMapping("/board")
-    public ResponseEntity<String> updatePost(@RequestParam(value = "boardSn", required = false) Integer boardSn,
+    @Transactional
+    public ResponseEntity<String> updatePost(@RequestParam(value = "boardSn", required = false) String strboardSn,
                                              @RequestParam("title") String title,
                                              @RequestParam("content") String content,
                                              @RequestParam("userSn") int userSn,
                                              @RequestParam(value = "files", required = false) List<MultipartFile> files,
                                              @RequestParam(value = "deletedFileIds", required = false) List<Integer> deletedFileIds) {
         try {
+            Integer boardSn = Integer.parseInt(strboardSn);
+
             Board post = boardService.getPostByBoardSn(boardSn);
             List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
             if (post == null || post.getUserSn() != userSn) {
@@ -182,7 +186,8 @@ public class BoardController {
             }
             return ResponseEntity.ok("게시글이 수정되었습니다.");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 수정 중 오류가 발생했습니다.");
+            e.printStackTrace(); // 서버 로그에 스택 트레이스 출력
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 수정 중 오류가 발생했습니다."+ e.getMessage());
         }
     }
 
