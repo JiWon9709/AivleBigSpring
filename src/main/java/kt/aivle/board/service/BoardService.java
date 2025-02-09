@@ -178,8 +178,6 @@ public class BoardService {
         return boardMapper.findPdfsByGongoSn(gongoSn);
     }
 
-
-
     // 소프트 공고게시글 삭제
     public void softDeleteGongo(int gongoSn) {
         boardMapper.softDeleteGongo(gongoSn);
@@ -194,4 +192,5 @@ public class BoardService {
     public void deletePdf(int pdfSn) {
         boardMapper.deletePdf(pdfSn);
     }
+
 }

@@ -11,6 +11,7 @@ import kt.aivle.member.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.*;
+
 import org.springframework.http.*;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +20,13 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -247,6 +250,7 @@ public class BoardController {
         }
     }
 
+
     @ApiOperation(value="공고게시글 올리기")
     @PostMapping("/post-gongoboard")
     public ResponseEntity<String> createGongo(@RequestParam("gongoName") String gongoName,
@@ -406,4 +410,37 @@ public class BoardController {
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 //        }
 //    }
+  
+    @ApiOperation(value = "게시글 PDF 다운로드")
+    @GetMapping("/gongoboard/pdf/download/{pdf_sn}")
+    public ResponseEntity<byte[]> downloadPdf(@PathVariable int pdf_sn) {
+        try {
+            PdfFileEntity pdfFile = boardService.getPdfFileById(pdf_sn);
+            if (pdfFile == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("파일을 찾을 수 없습니다.".getBytes(StandardCharsets.UTF_8));
+            }
+
+            // URL에서 파일 읽기
+            String fileUrl = pdfFile.getPath(); // "http://4.217.186.166:8081/uploads/pdf/..."
+            URL url = new URL(fileUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            // 파일 데이터 읽기
+            InputStream inputStream = connection.getInputStream();
+            byte[] fileContent = inputStream.readAllBytes();
+            inputStream.close();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.attachment().filename(pdfFile.getOriFileName()).build());
+            return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("서버 오류로 인해 파일을 다운로드할 수 없습니다.".getBytes(StandardCharsets.UTF_8));
+        }
+    }
 }
