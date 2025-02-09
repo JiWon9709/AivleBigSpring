@@ -177,4 +177,21 @@ public class BoardService {
     public List<PdfFileEntity> getPdfsByGongoSn(int gongoSn) {
         return boardMapper.findPdfsByGongoSn(gongoSn);
     }
+
+
+
+    // 소프트 공고게시글 삭제
+    public void softDeleteGongo(int gongoSn) {
+        boardMapper.softDeleteGongo(gongoSn);
+    }
+
+    // gongoSn 소프트이미지 삭제
+    public void softDeletePdf(int gongoSn) {
+        boardMapper.softDeletePdf(gongoSn);
+    }
+
+    // pdfSn pdf 삭제
+    public void deletePdf(int pdfSn) {
+        boardMapper.deletePdf(pdfSn);
+    }
 }

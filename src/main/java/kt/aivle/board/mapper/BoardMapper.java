@@ -23,4 +23,7 @@ public interface BoardMapper {
     public int regPdf(PdfFileEntity pdfEntity);
     public Gongo getPostByGongoSn(int gongoSn);
     public List<PdfFileEntity> findPdfsByGongoSn(int gongoSn);
+    public void softDeleteGongo(int gongoSn);
+    public void softDeletePdf(int gongoSn);
+    public void deletePdf(int pdfSn);
 }
