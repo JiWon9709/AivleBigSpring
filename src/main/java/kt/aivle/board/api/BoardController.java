@@ -10,20 +10,21 @@ import kt.aivle.member.service.RefreshTokenService;
 import kt.aivle.member.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Api(tags = "board", description = "게시판 api")
 @RestController
@@ -46,17 +47,6 @@ public class BoardController {
         }
         return boardlist;
     }
-
-//    @ApiOperation(value="게시글 이미지불러오기")
-//    @GetMapping("/board/images")
-//    public ResponseEntity<List<ImgEntity>> getImagesByBoardSn(@RequestParam("boardSn") int boardSn) {
-////        try {
-//            List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
-////        } catch (Exception e) {
-////            throw new RuntimeException(e);
-////        }
-//        return ResponseEntity.ok(imgs);
-//    }
 
     @ApiOperation(value="공고 리스트")
     @GetMapping("/gongoboard")
@@ -192,5 +182,109 @@ public class BoardController {
         }
     }
 
+//    @ApiOperation(value = "PDF 리스트 제공 API")
+//    @GetMapping("/pdfs")
+//    public ResponseEntity<List<String>> getPdfList() {
+//        File pdfDirectory = new File("/path/to/uploads/pdf");
+//        if (!pdfDirectory.exists() || !pdfDirectory.isDirectory()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//        }
+//
+//        // 디렉터리 내 PDF 파일 리스트 조회
+//        List<String> pdfFiles = Arrays.stream(pdfDirectory.listFiles())
+//                .filter(file -> file.isFile() && file.getName().endsWith(".pdf"))
+//                .map(File::getName)
+//                .collect(Collectors.toList());
+//
+//        return ResponseEntity.ok(pdfFiles);
+//    }
 
+    @ApiOperation(value = "공고게시글 상세 조회")
+    @GetMapping("/gongoboard/detail") // @RequestParam("userSn") int userSn 관리자 추가할거 생각.
+    public ResponseEntity<Map<String, Object>> getGongoDetail(@RequestParam("gongoSn") int gongoSn) {
+        try {
+            Gongo gongo = boardService.getPostByGongoSn(gongoSn);
+            List<PdfFileEntity> pdfs = boardService.getPdfsByGongoSn(gongoSn);
+//            boolean isOwner = (gongo.getUserSn() == userSn); // 본인 여부 확인
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("gongo", gongo);
+//            response.put("isOwner", isOwner);
+            response.put("pdfs", pdfs);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @ApiOperation(value="공고게시글 올리기")
+    @PostMapping("/post-gongoboard")
+    public ResponseEntity<String> createGongo(@RequestParam("gongoName") String gongoName,
+                                             @RequestParam("content") String content,
+                                              @RequestParam("gongoType") int gongoType,
+                                              @RequestParam("scheduleStartDt") String scheduleStartDt,
+                                              @RequestParam("scheduleEndDt") String scheduleEndDt,
+                                             @RequestParam(value = "files", required = false) List<MultipartFile> files) {
+        Gongo g = new Gongo();
+        g.setGongoName(gongoName);
+        g.setContent(content);
+        g.setGongoType(gongoType);
+        g.setScheduleStartDt(scheduleStartDt);
+        g.setScheduleEndDt(scheduleEndDt);
+        try {
+            // 공고게시글 저장
+            boardService.saveGongo(g);
+
+//            log.info("게시글 저장 요청: {}", g);
+            if (files != null && !files.isEmpty()) {
+                for (MultipartFile file : files) {
+                    if (!file.getContentType().equals("application/pdf")) {
+                        return ResponseEntity.badRequest().body("PDF 파일만 업로드 가능합니다.");
+                    }
+                    if (!file.isEmpty()) {
+                        boardService.uploadAndSavePdf("gongo", g.getGongoSn(), file);
+                    }
+                }
+            }
+        } catch (Exception e) {
+//            throw new RuntimeException(e);
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 등록 중 오류가 발생했습니다.");
+        }
+        return ResponseEntity.ok("공고게시글이 등록되었습니다.");
+    }
+
+    @ApiOperation(value = "게시글 PDF 다운로드")
+    @GetMapping("/gongoboard/pdf/download/{pdf_sn}")
+    public ResponseEntity<byte[]> downloadPdf(@PathVariable int pdf_sn) {
+        try {
+            PdfFileEntity pdfFile = boardService.getPdfFileById(pdf_sn);
+            if (pdfFile == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("파일을 찾을 수 없습니다.".getBytes(StandardCharsets.UTF_8));
+            }
+
+            // URL에서 파일 읽기
+            String fileUrl = pdfFile.getPath(); // "http://4.217.186.166:8081/uploads/pdf/..."
+            URL url = new URL(fileUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            // 파일 데이터 읽기
+            InputStream inputStream = connection.getInputStream();
+            byte[] fileContent = inputStream.readAllBytes();
+            inputStream.close();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.attachment().filename(pdfFile.getOriFileName()).build());
+            return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("서버 오류로 인해 파일을 다운로드할 수 없습니다.".getBytes(StandardCharsets.UTF_8));
+        }
+    }
 }

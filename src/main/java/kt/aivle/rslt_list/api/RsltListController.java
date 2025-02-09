@@ -40,11 +40,15 @@ public class RsltListController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResModel.class)})
   @GetMapping(value = "/jutaek-dtl", produces = MediaType.APPLICATION_JSON_VALUE)
   public BaseResModel<JutaekDtlInfo> rsltList(
-      @ApiParam(value = "주택상세고유번호", required = true) @RequestParam Long jutaekDtlSn) {
+      @ApiParam(value = "주택상세고유번호", required = true) @RequestParam Long jutaekDtlSn,
+      @ApiParam(value = "사용자고유번호", required = true) @RequestParam Long userSn,
+      @ApiParam(value = "공고고유번호", required = true) @RequestParam Long gongoSn) {
     BaseResModel<JutaekDtlInfo> response = new BaseResModel();
     try {
       JutaekDtlRequest jutaekDtlRequest = new JutaekDtlRequest();
       jutaekDtlRequest.setJutaekDtlSn(jutaekDtlSn);
+      jutaekDtlRequest.setUserSn(userSn);
+      jutaekDtlRequest.setGongoSn(gongoSn);
       response = rsltListService.jutaekDtl(jutaekDtlRequest);
     } catch (Exception e) {
       response.setResultMsg(e.getMessage());

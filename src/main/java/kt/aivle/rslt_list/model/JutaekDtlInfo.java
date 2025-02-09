@@ -68,4 +68,16 @@ public class JutaekDtlInfo {
    */
   @ApiModelProperty(required = true, notes = "위도", position = 12)
   private String latitude;
+
+  /**
+   * 인프라점수
+   */
+  @ApiModelProperty(required = true, notes = "인프라점수", position = 13)
+  private String infraScore;
+
+  /**
+   * 구조점수
+   */
+  @ApiModelProperty(required = true, notes = "구조점수", position = 14)
+  private Long structureScore;
 }

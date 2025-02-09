@@ -9,7 +9,7 @@
         user_name AS userName,
         title,
         content,
-        b.created_dt AS createdDt
+        DATE_FORMAT(b.created_dt, '%Y-%m-%d %H:%i') AS createdDt
         FROM
         board b
         JOIN
@@ -24,13 +24,14 @@
         SELECT
             gongo_sn,
             gongo_name,
+            content,
             gongo_type,
             schedule_start_dt,
             schedule_end_dt,
             document_start_dt,
             document_end_dt,
             use_yn,
-            created_dt,
+            DATE_FORMAT(created_dt, '%Y-%m-%d %H:%i') AS createdDt,
             updated_dt
         FROM
             gongo
@@ -137,5 +138,80 @@
         SET title = #{title}, content = #{content}, updated_dt = NOW()
         WHERE board_sn = #{boardSn}
     </update>
+
+    <!-- pdf db 불러오기-->
+    <select id="getPdfFileById" resultType="kt.aivle.board.model.PdfFileEntity">
+        SELECT *
+        FROM pdf
+        WHERE ref_table = 'gongo' AND pdf_sn = #{pdfSn} AND use_yn = 'Y'
+    </select>
+
+    <!--공고게시글 등록-->
+    <insert id="saveGongo" parameterType="kt.aivle.board.model.Gongo" keyProperty="gongoSn">
+        INSERT INTO gongo (
+        gongo_name,
+        content,
+        gongo_type,
+        schedule_start_dt,
+        schedule_end_dt,
+        use_yn,
+        created_dt
+        )
+        VALUES (
+        #{gongoName},
+        #{content},
+        #{gongoType},
+        #{scheduleStartDt},
+        #{scheduleEndDt},
+        'Y',
+        NOW()
+        )
+    </insert>
+
+    <!--pdf 서버 등록-->
+    <insert
+            id="regPdf"
+            parameterType="kt.aivle.board.model.PdfFileEntity"
+    >
+        /* kt.aivle.board.BoardMapper.regPdf*/
+        INSERT INTO pdf (
+        ref_table,
+        ref_sn,
+        path,
+        file_name,
+        ori_file_name,
+        use_yn,
+        created_dt
+        ) VALUES (
+        #{refTable}
+        , #{refSn}
+        , #{path}
+        , #{fileName}
+        , #{oriFileName}
+        , 'Y'
+        , NOW()
+        );
+    </insert>
+
+    <select id="getPostByGongoSn" resultType="kt.aivle.board.model.Gongo">
+        SELECT
+            gongo_name,
+            content,
+            gongo_type,
+            schedule_start_dt,
+            schedule_end_dt,
+            created_dt
+        FROM
+        gongo
+        WHERE
+        use_yn = 'Y' AND gongo_sn = #{gongoSn}
+    </select>
+
+    <!-- 이미지 테이블에서 게시판에 해당하는 이미지 찾기-->
+    <select id="findPdfsByGongoSn" resultType="kt.aivle.board.model.PdfFileEntity">
+        SELECT *
+        FROM pdf
+        WHERE ref_table = 'gongo' AND ref_sn = #{gongoSn} AND use_yn = 'Y'
+    </select>
 
 </mapper>

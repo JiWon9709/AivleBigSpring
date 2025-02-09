@@ -168,6 +168,8 @@
     , j.jutaek_address
     , j.longitude
     , j.latitude
+    , j.infra_score
+    , jd.structure_score
     <choose>
       <when test="inputRank == 1">
         , jd.a_guarantee AS guarantee
