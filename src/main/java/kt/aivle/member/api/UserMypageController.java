@@ -158,9 +158,11 @@ public class UserMypageController {
 
     @ApiOperation(value = "프로필 사진 삭제")
     @DeleteMapping("/delete-profile")
-    public ResponseEntity<Map<String, Object>> deleteProfileImage(@RequestParam("userSn") Long userSn) {
+    public ResponseEntity<Map<String, Object>> deleteProfileImage(Authentication authentication) {
         try {
-            userMypageService.deleteProfileImage(userSn);
+            // JWT에서 userSn 추출
+            Long userSn = Long.valueOf(authentication.getName());
+
             return ResponseEntity.ok(Map.of("resultCode", 200, "message", "프로필 이미지가 삭제되었습니다."));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
