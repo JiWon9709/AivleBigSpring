@@ -303,8 +303,8 @@ public class BoardController {
             value = "/gongoboard/pdf/download/{pdfSn}",
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE  // force the content type
     )
-    public ResponseEntity<Resource> downloadPdf(@PathVariable int sn) throws IOException {
-        String filePath = boardMapper.getPdfPathById(sn);
+    public ResponseEntity<Resource> downloadPdf(@PathVariable int pdfSn) throws IOException {
+        String filePath = boardMapper.getPdfPathById(pdfSn);
         File file = new File(filePath);
         if (!file.exists() || !file.isFile()) {
             return ResponseEntity.notFound().build();
