@@ -102,7 +102,7 @@
             b.user_sn,
             title,
             content,
-            b.created_dt AS createdDt
+            DATE_FORMAT(b.created_dt, '%Y-%m-%d %H:%i') AS createdDt
         FROM
         board b
         JOIN
@@ -214,4 +214,11 @@
         WHERE ref_table = 'gongo' AND ref_sn = #{gongoSn} AND use_yn = 'Y'
     </select>
 
+    <!-- pdf db 불러오기-->
+    <select id="getPdfPathById" resultType="String">
+        SELECT
+        CONCAT(path, file_name) AS result
+        FROM pdf
+        WHERE ref_table = 'gongo' AND pdf_sn = #{pdfSn} AND use_yn = 'Y'
+    </select>
 </mapper>

@@ -27,4 +27,5 @@ public interface BoardMapper {
     public void softDeleteGongo(int gongoSn);
     public void softDeletePdf(int gongoSn);
     public void deletePdf(int pdfSn);
+    public String getPdfPathById(int pdfSn);
 }
