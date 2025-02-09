@@ -5,19 +5,31 @@ import io.swagger.annotations.*;
 import kt.aivle.base.BaseMsg;
 import kt.aivle.base.BaseResListModel;
 import kt.aivle.base.BaseResModel;
+import kt.aivle.rslt_list.mapper.RsltListMapper;
 import kt.aivle.rslt_list.model.*;
 import kt.aivle.rslt_list.service.RsltListService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @RestController
 @Api(tags = "rslt_list", description = "결과 리스트 API")
 public class RsltListController {
+
+  @Autowired
+  private RsltListMapper rsltListMapper;
 
   @Autowired
   private RsltListService rsltListService;
@@ -91,14 +103,32 @@ public class RsltListController {
     return response;
   }
 
-  @ApiOperation(value = "file.1 파일다운로드", notes = "파일다운로드", response = BaseResModel.class)
-  @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = BaseResModel.class)})
-  @RequestMapping(value = "/v1/download",
-      method = RequestMethod.POST,
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<byte[]> FileList(@RequestBody JutaekDtlRequest downloadRequest) throws UnsupportedEncodingException {
-    ResponseEntity<byte[]> data = rsltListService.download(downloadRequest);
-    return data;
+  @ApiOperation(
+      value = "file.1 파일다운로드",
+      notes = "파일다운로드",
+      response = Resource.class   // Use Resource.class here
+  )
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "OK", response = Resource.class)
+  })
+  @GetMapping(
+      value = "/v1/download/{sn}",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE  // force the content type
+  )
+  public ResponseEntity<Resource> downloadPdf(@PathVariable Long sn) throws IOException {
+    String filePath = rsltListMapper.getPdfFileById(sn);
+    File file = new File(filePath);
+    if (!file.exists() || !file.isFile()) {
+      return ResponseEntity.notFound().build();
+    }
+    InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"");
+
+    return ResponseEntity.ok()
+        .headers(headers)
+        .contentLength(file.length())
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .body(resource);
   }
 }
