@@ -54,6 +54,7 @@
         /* UserMypageMapper.updateUserWithdrawal */
         UPDATE user
         SET use_yn = 'N',
+            withdrawal_dt = NOW(),
             updated_dt = NOW()
         WHERE user_sn = #{userSn}
         AND use_yn = 'Y'

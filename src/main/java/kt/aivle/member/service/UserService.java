@@ -17,6 +17,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -38,9 +40,29 @@ public class UserService {
 
     @Transactional
     public void signup(SignupRequest signupRequest) { // 회원가입
+
+        UserResponse existingUser = userMapper.findByEmail(signupRequest.getEmail());
+
         //이메일 중복 체크
-        if (userMapper.findByEmail(signupRequest.getEmail()) != null) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+        if (existingUser != null) {
+            if (existingUser.getUseYn().equals("Y")) {
+                throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+            } else {
+                // 탈퇴한 회원인 경우 30일 제한 체크
+                LocalDateTime withdrawalDate = existingUser.getWithdrawalDt();
+                if (withdrawalDate != null) {
+                    long daysSinceWithdrawal = ChronoUnit.DAYS.between(
+                            withdrawalDate,
+                            LocalDateTime.now()
+                    );
+                    if (daysSinceWithdrawal < 30) {
+                        throw new IllegalArgumentException(
+                                String.format(" 탈퇴 후 30일이 경과하지 않았습니다. %d일 후에 다시 시도해주세요.",
+                                        30 - daysSinceWithdrawal)
+                        );
+                    }
+                }
+            }
         }
         try {
             signupRequest.setPassword(Sha256Util.encrypt(signupRequest.getPassword())); // 비밀번호 암호화
@@ -50,6 +72,27 @@ public class UserService {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("비밀번호 암호화 실패", e);
         }
+    }
+
+    public Map<String, Object> checkEmail(String email) {
+        Map<String, Object> response = new HashMap<>();
+        UserResponse user = userMapper.findByEmail(email);
+
+        if (user == null) {
+            response.put("success", true);
+            response.put("exists", false);
+            response.put("message", "사용 가능한 이메일입니다.");
+        } else if (user.getUseYn().equals("N")) {
+            response.put("success", false);
+            response.put("exists", true);
+            response.put("message", "탈퇴 후 30일이 경과하지 않아 재가입이 제한됩니다.");
+        } else {
+            response.put("success", false);
+            response.put("exists", true);
+            response.put("message", "이미 사용 중인 이메일입니다.");
+        }
+
+        return response;
     }
 
     @Transactional(readOnly = true)

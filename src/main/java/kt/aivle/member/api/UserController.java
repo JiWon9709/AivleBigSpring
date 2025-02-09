@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 
@@ -45,7 +44,13 @@ public class UserController {
             return ResponseEntity.badRequest()
                     .body(new UserException(400, e.getMessage()));
         }
+    }
 
+    @ApiOperation(value = "이메일 중복 체크")
+    @PostMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestBody EmailCheckRequest request) {
+        Map<String, Object> response = userService.checkEmail(request.getEmail());
+        return ResponseEntity.ok(response);
     }
 
     @ApiOperation(value = "로그인")
@@ -219,9 +224,6 @@ public class UserController {
 
 
 
-
-
-
     @ApiOperation(value = "내 이름 받아오기(헤더)")
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUserInfo(Authentication authentication) {
@@ -251,17 +253,7 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "이메일 중복 체크")
-    @PostMapping("/check-email")
-    public ResponseEntity<?> checkEmail(@RequestBody EmailCheckRequest request) {
-        boolean exists = userService.checkEmailExists(request.getEmail());
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", !exists);
-        response.put("message", exists ? "이미 사용 중인 이메일입니다." : "사용 가능한 이메일입니다.");
-        response.put("exists", exists);
 
-        return ResponseEntity.ok(response);
-    }
 
     @ApiOperation(value = "이메일 통한 비밀번호 찾기 요청")
     @PostMapping("/forgot-password")
