@@ -141,7 +141,6 @@ public class BoardService {
         // 파일 이름 및 확장자 생성
         String uploadFolder = dir + "pdf";
         String originalFilename = pdfFile.getOriginalFilename();
-//        String ext = originalFilename.substring(originalFilename.lastIndexOf('.') + 1);
         String uniqueFileName = UUID.randomUUID().toString() + ".pdf";
 
         // 디렉터리 생성 체크
