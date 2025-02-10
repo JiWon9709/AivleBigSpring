@@ -33,6 +33,16 @@
         </otherwise>
       </choose>
     </if>
+    <if test="inputType != null and inputType != ''">
+      <choose>
+        <when test="inputType == '신혼부부'">
+          AND jd.apply_type = 1
+        </when>
+        <otherwise>
+          AND jd.apply_type IN (0, 2, 3, 4)
+        </otherwise>
+      </choose>
+    </if>
   </sql>
 
   <!-- 방금 입력한 input sn 찾기 -->
