@@ -219,7 +219,7 @@ public class BoardController {
     public ResponseEntity<Map<String, Object>> getGongoDetail(@RequestParam("gongoSn") int gongoSn) {
         try {
             Gongo gongo = boardService.getPostByGongoSn(gongoSn);
-            List<PdfFileEntity> pdfs = boardService.getPdfsByGongoSn(gongoSn);
+            List<PdfFileEntity> pdfs = boardService.findPdfsByGongoSn(gongoSn);
 //            boolean isOwner = (gongo.getUserSn() == userSn); // 본인 여부 확인
 
             Map<String, Object> response = new HashMap<>();
@@ -243,7 +243,7 @@ public class BoardController {
             }
             boardService.softDeleteGongo(gongoSn);
             // pdf 데이터도 삭제
-            List<PdfFileEntity> pdfs = boardService.getPdfsByGongoSn(gongoSn);
+            List<PdfFileEntity> pdfs = boardService.findPdfsByGongoSn(gongoSn);
             if (!pdfs.isEmpty()) {
                 boardService.softDeletePdf(gongoSn);
             }
