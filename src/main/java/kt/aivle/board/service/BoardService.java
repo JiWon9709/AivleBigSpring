@@ -30,16 +30,28 @@ public class BoardService {
     private BoardMapper boardMapper;
     private static final String FTP_UPLOAD_DIR = "/uploads/board/";
     private static final String FTP_URL_PREFIX = "/app/data/uploads/";
+    private static final String FTP_URL_IMG = "http://4.217.186.166:8081/uploads/img/";
 
     @Value("${file.path}")
     private String dir;
 
-    public BoardListResponse getListBoard() {
+    public BoardListResponse getListBoard(int page, int size) {
         BoardListResponse boardlist = new BoardListResponse();
         try {
+            // 페이지 번호를 0부터 시작하도록 변환
+            int offset = (page - 1) * size;
+
             // mapper에서 리스트형식으로 받기위해 set
-            List<Board> boardList = boardMapper.getListBoard();
+            List<Board> boardList = boardMapper.getListBoard(offset, size);
+//            boardlist.setBoardListResponse(boardList);
+            // 전체 게시글 수 조회
+            int totalCount = boardMapper.getTotalCount();
+
+            // 응답 데이터 설정
             boardlist.setBoardListResponse(boardList);
+            boardlist.setTotalCount(totalCount); // 전체 게시글 수
+            boardlist.setPage(page);            // 현재 페이지
+            boardlist.setSize(size);            // 페이지 크기
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -50,12 +62,19 @@ public class BoardService {
         return boardMapper.findImagesByBoardSn(boardSn);
     }
 
-    public GongoListResponse getListGongo() {
+    public GongoListResponse getListGongo(int page, int size) {
         GongoListResponse gongolist = new GongoListResponse();
         try {
+            // 페이지 번호를 0부터 시작하도록 변환
+            int offset = (page - 1) * size;
             // mapper에서 리스트형식으로 받기위해 set
-            List<Gongo> gongoList = boardMapper.getListGongo();
+            List<Gongo> gongoList = boardMapper.getListGongo(offset, size);
+            int totalCount = boardMapper.getGongoTotalCount();
+
             gongolist.setGongoListResponse(gongoList);
+            gongolist.setTotalCount(totalCount); // 전체 게시글 수
+            gongolist.setPage(page);            // 현재 페이지
+            gongolist.setSize(size);            // 페이지 크기
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -84,7 +103,7 @@ public class BoardService {
         ImgEntity imgEntity = new ImgEntity();
         imgEntity.setRefTable(refTable);
         imgEntity.setRefSn(refSn);
-        imgEntity.setPath(FTP_URL_PREFIX + "img/");
+        imgEntity.setPath(FTP_URL_IMG + "img/");
         imgEntity.setFileName(uniqueFileName);
         imgEntity.setOriFileName(originalFilename);
         imgEntity.setExt(ext);

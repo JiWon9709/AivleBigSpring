@@ -18,6 +18,28 @@
         board_yn = 'Y'
         ORDER BY
         b.created_dt DESC
+        LIMIT #{offset}, #{size};
+    </select>
+
+<!--    <select id="">-->
+<!--        SELECT *-->
+<!--        FROM board-->
+<!--        ORDER BY created_dt DESC-->
+<!--        LIMIT #{offset}, #{size};-->
+<!--    </select>-->
+
+    <select id="getTotalCount" resultType="int">
+        SELECT COUNT(*)
+        FROM board
+        WHERE
+        board_yn = 'Y';
+    </select>
+
+    <select id="getGongoTotalCount" resultType="int">
+        SELECT COUNT(*)
+        FROM gongo
+        WHERE
+        use_yn = 'Y';
     </select>
 
     <select id="getListGongo" resultType="kt.aivle.board.model.Gongo">
@@ -39,6 +61,7 @@
             use_yn = 'Y'
         ORDER BY
             gongo_sn DESC
+        LIMIT #{offset}, #{size};
     </select>
 
     <!--게시글 등록-->
@@ -195,6 +218,7 @@
 
     <select id="getPostByGongoSn" resultType="kt.aivle.board.model.Gongo">
         SELECT
+            gongo_sn,
             gongo_name,
             content,
             gongo_type,

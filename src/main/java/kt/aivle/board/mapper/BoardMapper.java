@@ -2,15 +2,21 @@ package kt.aivle.board.mapper;
 
 import kt.aivle.base.config.mapper.DATA_SOURCE;
 import kt.aivle.board.model.*;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
 @DATA_SOURCE
 public interface BoardMapper {
-    public List<Board> getListBoard();
+    public List<Board> getListBoard(@Param("offset")int offset, @Param("size")int size);
+    public int getTotalCount();
+
     public List<ImgEntity> findImagesByBoardSn(int boardSn);
     public void saveboard(Board board);
-    public List<Gongo> getListGongo();
+
+    public List<Gongo> getListGongo(@Param("offset")int offset, @Param("size")int size);
+    public int getGongoTotalCount();
+
     public int regImg(ImgEntity imgEntity);
     public Board getPostByBoardSn(int boardSn);
     public void softDeletePost(int boardSn);
