@@ -173,7 +173,7 @@ public class BoardService {
     }
 
     // 공고게시글의 pdf 불러오기
-    public List<PdfFileEntity> getPdfsByGongoSn(int gongoSn) {
+    public List<PdfFileEntity> findPdfsByGongoSn(int gongoSn) {
         return boardMapper.findPdfsByGongoSn(gongoSn);
     }
 

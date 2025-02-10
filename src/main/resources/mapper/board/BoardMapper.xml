@@ -125,7 +125,7 @@
         WHERE ref_sn = #{boardSn}
     </update>
 
-    <!-- 게시글의 이미지 소프트 삭제 기능(실제로는 n으로 바꾸기) -->
+    <!-- 이미지 소프트 삭제 기능(실제로는 n으로 바꾸기) -->
     <update id="deleteImage">
         UPDATE img
         SET use_yn = 'N'
@@ -221,4 +221,25 @@
         FROM pdf
         WHERE ref_table = 'gongo' AND pdf_sn = #{pdfSn} AND use_yn = 'Y'
     </select>
+
+    <!-- 공고게시글 소프트 삭제 기능(실제로는 n으로 바꾸기) -->
+    <update id="softDeleteGongo">
+        UPDATE gongo
+        SET use_yn = 'N'
+        WHERE gongo_sn = #{gongoSn}
+    </update>
+
+    <!-- 공고게시글 이미지 소프트 삭제 기능(실제로는 n으로 바꾸기) -->
+    <update id="softDeletePdf">
+        UPDATE pdf
+        SET use_yn = 'N'
+        WHERE ref_sn = #{gongoSn}
+    </update>
+
+    <!-- 이미지 소프트 삭제 기능(실제로는 n으로 바꾸기) -->
+    <update id="deletePdf">
+        UPDATE pdf
+        SET use_yn = 'N'
+        WHERE pdf_sn = #{pdfSn}
+    </update>
 </mapper>
