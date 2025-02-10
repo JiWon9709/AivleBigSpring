@@ -49,10 +49,13 @@ public class BoardController {
 
     @ApiOperation(value="게시글 리스트")
     @GetMapping("/userboard")
-    public BoardListResponse getListBoard(){
+    public BoardListResponse getListBoard(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "7") int size)
+    {
         BoardListResponse boardlist = new BoardListResponse();
         try {
-            boardlist = boardService.getListBoard();
+            boardlist = boardService.getListBoard(page, size);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -61,10 +64,13 @@ public class BoardController {
 
     @ApiOperation(value="공고 리스트")
     @GetMapping("/gongoboard")
-    public GongoListResponse getListGongo(){
+    public GongoListResponse getListGongo(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "7") int size)
+    {
         GongoListResponse gongolist = new GongoListResponse();
         try {
-            gongolist = boardService.getListGongo();
+            gongolist = boardService.getListGongo(page, size);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

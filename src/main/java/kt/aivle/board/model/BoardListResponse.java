@@ -9,4 +9,7 @@ import java.util.List;
 public class BoardListResponse {
     @ApiModelProperty(notes = "게시글리스트")
     private List<Board> BoardListResponse;
+    private int TotalCount;
+    private int page;
+    private int size;
 }

@@ -9,4 +9,7 @@ import java.util.List;
 public class GongoListResponse {
     @ApiModelProperty(notes = "게시글리스트")
     private List<Gongo> GongoListResponse;
+    private int TotalCount;
+    private int page;
+    private int size;
 }
