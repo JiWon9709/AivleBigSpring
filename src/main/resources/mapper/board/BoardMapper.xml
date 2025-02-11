@@ -266,4 +266,14 @@
         SET use_yn = 'N'
         WHERE pdf_sn = #{pdfSn}
     </update>
+
+    <!-- userRole 구하기-->
+    <select id="getUserRole" resultType="String">
+        SELECT
+            role
+        FROM
+            user
+        WHERE
+            user_sn = #{userSn} AND use_yn = 'Y'
+    </select>
 </mapper>

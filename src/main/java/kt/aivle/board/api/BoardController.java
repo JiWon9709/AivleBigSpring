@@ -140,12 +140,14 @@ public class BoardController {
         }
     }
 
-    @ApiOperation(value = "게시글 소프트 삭제")
+    @ApiOperation(value = "유저게시글 소프트 삭제")
     @PutMapping("/userboard/{boardSn}")
     public ResponseEntity<String> softDeletePost(@PathVariable int boardSn, @RequestParam int userSn) {
         try {
             Board post = boardService.getPostByBoardSn(boardSn);
-            if (post == null || post.getUserSn() != userSn) {
+            // 관리자체크
+            String role = boardMapper.getUserRole(userSn);
+            if (post == null || (role.equals("ROLE_USER") &&post.getUserSn() != userSn)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
             }
             boardService.softDeletePost(boardSn);
@@ -160,27 +162,8 @@ public class BoardController {
         }
     }
 
-    @ApiOperation(value = "게시글 소프트 삭제")
-    @PutMapping("/userboard/admin/{boardSn}")
-    public ResponseEntity<String> softDeletePostbyAdmin(@PathVariable int boardSn, @RequestParam int userSn) {
-        try {
-            Board post = boardService.getPostByBoardSn(boardSn);
-            if (post == null) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
-            }
-            boardService.softDeletePost(boardSn);
-            // img 데이터도 삭제
-            List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
-            if (!imgs.isEmpty()) {
-                boardService.softDeleteImg(boardSn);
-            }
-            return ResponseEntity.ok("게시글이 삭제되었습니다.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 삭제 중 오류가 발생했습니다.");
-        }
-    }
 
-    @ApiOperation(value = "게시글 수정")
+    @ApiOperation(value = "유저게시글 수정")
     @PostMapping("/userboard")
     @Transactional
     public ResponseEntity<String> updatePost(@RequestParam(value = "boardSn", required = false) String strboardSn,
@@ -194,7 +177,9 @@ public class BoardController {
 
             Board post = boardService.getPostByBoardSn(boardSn);
             List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
-            if (post == null || post.getUserSn() != userSn) {
+            // 관리자체크
+            String role = boardMapper.getUserRole(userSn);
+            if (post == null || (role.equals("ROLE_USER") && post.getUserSn() != userSn)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
             }
             // 게시글 정보 설정 및 저장
@@ -297,8 +282,6 @@ public class BoardController {
         try {
             // 공고게시글 저장
             boardService.saveGongo(g);
-
-//            log.info("게시글 저장 요청: {}", g);
             if (files != null && !files.isEmpty()) {
                 for (MultipartFile file : files) {
                     if (!file.getContentType().equals("application/pdf")) {
