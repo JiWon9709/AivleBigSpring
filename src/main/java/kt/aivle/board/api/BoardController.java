@@ -160,6 +160,26 @@ public class BoardController {
         }
     }
 
+    @ApiOperation(value = "게시글 소프트 삭제")
+    @PutMapping("/userboard/admin/{boardSn}")
+    public ResponseEntity<String> softDeletePostbyAdmin(@PathVariable int boardSn, @RequestParam int userSn) {
+        try {
+            Board post = boardService.getPostByBoardSn(boardSn);
+            if (post == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
+            }
+            boardService.softDeletePost(boardSn);
+            // img 데이터도 삭제
+            List<ImgEntity> imgs = boardService.getImagesByBoardSn(boardSn);
+            if (!imgs.isEmpty()) {
+                boardService.softDeleteImg(boardSn);
+            }
+            return ResponseEntity.ok("게시글이 삭제되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 삭제 중 오류가 발생했습니다.");
+        }
+    }
+
     @ApiOperation(value = "게시글 수정")
     @PostMapping("/userboard")
     @Transactional
