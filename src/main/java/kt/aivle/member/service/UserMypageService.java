@@ -106,7 +106,7 @@ public class UserMypageService {
                 throw new RuntimeException("회원 탈퇴 처리에 실패했습니다.");
             }
 
-            log.info("회원 탈퇴 처리 완료 - userS: {}", userSn);
+            log.info("회원 탈퇴 처리 완료 - userSn: {}", userSn);
         } catch (NoSuchAlgorithmException e) {
             log.error("비밀번호 암호화 중 오류 발생", e);
             throw new RuntimeException("비밀번호 검증 중 오류가 발생했습니다.");
@@ -119,13 +119,13 @@ public class UserMypageService {
     @Transactional
     public UserProfileImageResponse uploadProfileImage(UserProfileImageUpdateRequest request, MultipartFile file) {
         try {
-            log.info("📌 프로필 이미지 업로드 시작 - userSn: {}", request.getUserSn());
+            log.info("프로필 이미지 업로드 시작 - userSn: {}", request.getUserSn());
 
             // 1️⃣ 파일 검증
             String contentType = file.getContentType();
-            log.info("📌 업로드된 파일의 contentType: {}", contentType);
+            log.info("업로드된 파일의 contentType: {}", contentType);
             if (contentType == null || !contentType.startsWith("image/")) {
-                log.error("❌ 허용되지 않는 파일 형식: {}", contentType);
+                log.error("허용되지 않는 파일 형식: {}", contentType);
                 throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
             }
 
