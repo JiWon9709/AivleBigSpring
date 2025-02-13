@@ -72,7 +72,7 @@ public class UserController {
             ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", tokenDto.getAccessToken())
                     .httpOnly(true)
                     .secure(false) // HTTP 환경에서는 false, HTTPS에서는 true
-                    .sameSite("Lax") // ✅ SameSite 설정 가능
+                    .sameSite("Lax") //
                     .path("/")
                     .maxAge((int) (JwtTokenProvider.ACCESS_TOKEN_EXPIRE_TIME / 1000)) // 30분
                     .build();
@@ -115,7 +115,7 @@ public class UserController {
 
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
-                    log.info("Cookie Found: {} = {}", cookie.getName(), cookie.getValue()); // 로그 추가
+
                     if (cookie.getName().equals("refresh_token")) {
                         refreshToken = cookie.getValue();
                         break;
@@ -147,7 +147,7 @@ public class UserController {
                         .body(new TokenResponse(false, "유효하지 않은 Refresh Token입니다.", null));
             }
 
-            log.info("✅ 새 Access Token 발급 완료: {}", newTokenDto.getAccessToken());
+            log.info("✅ 새 Access Token 발급 완료");
 
             // ✅ 새로운 Access Token을 쿠키에 설정
             ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", newTokenDto.getAccessToken())
@@ -261,7 +261,7 @@ public class UserController {
         try {
             String email = request.getEmail();
             String code = userService.sendVerificationCode(email);
-            log.info("인증코드 생성 완료: 이메일: {}", email);
+            log.info("인증코드 생성 완료: 이메일");
 
             userService.sendEmail(email, code);
             log.info("이메일 발송 완료");

@@ -54,8 +54,8 @@ public class JwtTokenProvider {
         Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
         Date refreshTokenExpiresIn = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
 
-        log.info("Access token expiration: {}", accessTokenExpiresIn);
-        log.info("Refresh token expiration: {}", refreshTokenExpiresIn);
+//        log.info("Access token expiration: {}", accessTokenExpiresIn);
+//        log.info("Refresh token expiration: {}", refreshTokenExpiresIn);
 
         String accessToken = Jwts.builder()
                 .setClaims(claims)
@@ -105,14 +105,13 @@ public class JwtTokenProvider {
 
     // access 만료되어서 reissue 요청한 사용자에 대해 리프레시 토큰 이용한 access 토큰 재발급
     public TokenDto refreshToken(String refreshToken) {
-        log.info("🚀 Refresh 토큰 검증 중: {}", refreshToken);
+        log.info("🚀 Refresh 토큰 검증 중");
         try {
             Claims claims = parseClaims(refreshToken);
             String userPk = claims.getSubject();
             List<String> roles = claims.get("roles", List.class);
 
             // 액세스 토큰만 새로 발급
-            log.info("✅ Refresh Token 유효: userPk={}, roles={}", userPk, roles);
             return createAccessTokenByRefresh(userPk, roles, refreshToken);
         } catch (ExpiredJwtException e) {
             log.warn("🚨 Refresh Token 만료: {}", e.getMessage());

@@ -98,7 +98,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserResponse login(LoginRequest loginRequest) {
         try {
-            log.info("로그인 시도 - 이메일: {}", loginRequest.getEmail());
+//            log.info("로그인 시도 - 이메일: {}", loginRequest.getEmail());
 
             // 이메일로 사용자 조회
             UserAuth userAuth = userMapper.findByEmailForAuth(loginRequest.getEmail());
@@ -109,11 +109,8 @@ public class UserService {
 
             // 비밀번호 검증
             String encryptedPassword = Sha256Util.encrypt(loginRequest.getPassword().trim());
-            log.info("입력된 비밀번호 암호화 결과: {}", encryptedPassword);
-            log.info("저장된 비밀번호: {}", userAuth.getPassword());
 
             if (!userAuth.getPassword().equals(encryptedPassword)) {
-                log.warn("비밀번호 불일치 - 이메일: {}", loginRequest.getEmail());
                 throw new IllegalArgumentException("잘못된 비밀번호입니다.");
             }
 
@@ -142,7 +139,7 @@ public class UserService {
         log.info("이메일 인증 코드 발송 시도 - 이메일: {}", email);
 
         UserResponse user = userMapper.findByEmail(email);
-        log.info("조회된 사용자 정보: {}", user);  // null인지 확인
+
 
         if (user == null || !"Y".equals(user.getUseYn())) {
             throw new IllegalArgumentException("존재하지 않는 이메일입니다.");
@@ -165,7 +162,7 @@ public class UserService {
 
             helper.setTo(email);
             helper.setSubject("Zipline - 비밀번호 재설정 인증번호");
-            helper.setFrom("your-email@gmail.com");
+            helper.setFrom("ziplineaivle@gmail.com");
 
             String htmlContent = String.format("""
             <div style="margin:100px;">

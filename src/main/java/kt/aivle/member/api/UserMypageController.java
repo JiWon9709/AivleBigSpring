@@ -19,7 +19,6 @@ import java.util.Map;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Slf4j
-//@CrossOrigin(origins = "http://localhost:3000") // React 앱의 도메인 허용. SecurityConfig에서 전역으로 CORS 설정해서 개별 설정 불필요.
 public class UserMypageController {
 
     @Autowired
