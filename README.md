@@ -6,6 +6,9 @@
 
 - 인원: 7명 (기여도 30%)
 - [상세내용URL](https://www.notion.so/AI-1a49ab0c437c80c48028d69441571cd2?pvs=21) / https://github.com/JiWon9709/AivleBigSpring
+  
+![청약주택커트라인1p (1)](https://github.com/user-attachments/assets/36cd79d5-08e5-4009-8a8e-3981a616581e)
+
 
 **[담당한 부분] - 풀스택 (백엔드 Spring Boot, 프론트엔드 React)**
 
